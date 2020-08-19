@@ -1,5 +1,7 @@
 # slipstream
 
+An addon manger for World of Warcraft
+
 ## Project setup
 ```
 npm install
