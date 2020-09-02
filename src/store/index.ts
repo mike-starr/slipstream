@@ -10,7 +10,7 @@ Vue.use(Vuex);
 
 const rootStore = new Vuex.Store({
   state: {
-    appDataDirectory: remote.app.getPath("appData")
+    appDataDirectory: remote.app.getPath("userData")
   },
   modules: {
     CurseAddons,

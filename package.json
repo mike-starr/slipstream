@@ -1,5 +1,6 @@
 {
   "name": "slipstream",
+  "productName": "slipstream",
   "version": "0.1.0",
   "private": true,
   "scripts": {
