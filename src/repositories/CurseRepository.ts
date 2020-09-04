@@ -1,6 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 
+
 enum CurseReleaseType {
   Release = 1,
   Beta = 2,
@@ -37,7 +38,7 @@ type CurseAddonIdentificationResult = {
   unidentified: string[];
 };
 
-export default class CurseRepository {
+class CurseRepository {
   private static readonly baseApiUrl = "https://addons-ecs.forgesvc.net/api/v2";
   private static readonly databaseFilename = "curse_addon_database.json";
   private static readonly maxAddons = 15000;
@@ -277,8 +278,22 @@ export default class CurseRepository {
     };
   }
 
-  private createAddonSearchRequest(index: number, pageSize: number) {
-    return `${CurseRepository.baseApiUrl}/addon/search?gameId=1&index=${index}&pageSize=${pageSize}`;
+  searchAddons(searchTerm: string) {
+    //this.createAddonSearchRequest(0, 50, searchTerm);
+
+    console.log(`searching for ${searchTerm}`);
+
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(["1", "2", "3"]), 2000);
+    });
+  }
+
+  private createAddonSearchRequest(
+    index: number,
+    pageSize: number,
+    searchFilter = ""
+  ) {
+    return `${CurseRepository.baseApiUrl}/addon/search?gameId=1&index=${index}&pageSize=${pageSize}&searchFilter=${searchFilter}`;
   }
 
   private verifyAddonInstalled(
@@ -295,3 +310,5 @@ export default class CurseRepository {
     return true;
   }
 }
+
+export default new CurseRepository();

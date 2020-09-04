@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-expansion-panels>
       <v-expansion-panel v-for="(item, i) in 50" :key="i">
         <v-expansion-panel-header>
@@ -9,7 +9,7 @@
             <v-col cols="2">Source</v-col>
 
             <v-col cols="2"
-              ><v-btn color="primary" @click.stop="">Update</v-btn></v-col
+              ><v-btn color="primary" @click.stop="">Install</v-btn></v-col
             >
             <v-spacer></v-spacer>
           </v-row>
@@ -27,12 +27,8 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { CurseAddonsState } from "@/store/index";
+// import { CurseAddonsState } from "@/store/index";
 
 @Component
-export default class InstalledAddons extends Vue {
-  created() {
-    CurseAddonsState.initialize();
-  }
-}
+export default class AddonSearchResults extends Vue {}
 </script>

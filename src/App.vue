@@ -27,19 +27,7 @@
             <v-tab>Installed Addons</v-tab>
             <v-tab>Search</v-tab>
           </v-tabs>
-          <v-container>
-            <v-row align="center">
-              <v-col cols="8">
-                <v-text-field
-                  height="36px"
-                  class="mx-4"
-                  label="Search"
-                  dense
-                ></v-text-field>
-              </v-col>
-              <v-col cols="4">Filters</v-col>
-            </v-row>
-          </v-container>
+          <AddonSearch v-if="tabs === 1"></AddonSearch>
           <v-divider></v-divider>
         </v-sheet>
 
@@ -49,7 +37,7 @@
               <InstalledAddons />
             </v-tab-item>
             <v-tab-item reverse-transition="false" transition="false"
-              ><AddonSearch />
+              ><AddonSearchResults />
             </v-tab-item>
           </v-tabs-items>
         </v-sheet>
@@ -59,15 +47,15 @@
 </template>
 
 <script lang="ts">
-//import Vue from "vue";
 import { Component, Vue } from "vue-property-decorator";
 import InstalledAddons from "./components/InstalledAddons.vue";
 import AddonSearch from "./components/AddonSearch.vue";
+import AddonSearchResults from "./components/AddonSearchResults.vue";
 import AvatarImage from "./assets/logo.png";
 import { GameConfigurationState } from "@/store/index";
 
 @Component({
-  components: { InstalledAddons, AddonSearch }
+  components: { InstalledAddons, AddonSearch, AddonSearchResults }
 })
 export default class App extends Vue {
   tabs = null;

@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import AddonSearch from "@/store/modules/AddonSearch";
 import CurseAddons from "@/store/modules/CurseAddons";
 import GameConfiguration from "@/store/modules/GameConfiguration";
 import { getModule } from "vuex-module-decorators";
@@ -13,8 +14,9 @@ const rootStore = new Vuex.Store({
     appDataDirectory: remote.app.getPath("userData")
   },
   modules: {
+    AddonSearch,
     CurseAddons,
-    GameConfiguration
+    GameConfiguration,
   },
   strict: true
 });
@@ -22,3 +24,4 @@ const rootStore = new Vuex.Store({
 export default rootStore;
 export const GameConfigurationState = getModule(GameConfiguration, rootStore);
 export const CurseAddonsState = getModule(CurseAddons, rootStore);
+export const AddonSearchState = getModule(AddonSearch, rootStore);
