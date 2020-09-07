@@ -10,7 +10,6 @@
           dense
         ></v-text-field>
       </v-col>
-
     </v-row>
   </v-container>
 </template>
@@ -29,6 +28,8 @@ export default class AddonSearch extends Vue {
   searchTermChanged() {
     if (this.searchTerm.length > 1) {
       AddonSearchState.search(this.searchTerm);
+    } else {
+      AddonSearchState.setSearchResults([]);
     }
   }
 }

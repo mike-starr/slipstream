@@ -1,27 +1,28 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import AddonSearch from "@/store/modules/AddonSearch";
-import CurseAddons from "@/store/modules/CurseAddons";
+//import CurseAddons from "@/store/modules/CurseAddons";
 import GameConfiguration from "@/store/modules/GameConfiguration";
-import { getModule } from "vuex-module-decorators";
 
 import { remote } from "electron";
 
 Vue.use(Vuex);
 
-const rootStore = new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     appDataDirectory: remote.app.getPath("userData")
   },
-  modules: {
-    AddonSearch,
-    CurseAddons,
-    GameConfiguration,
-  },
+  modules: {},
   strict: true
 });
 
-export default rootStore;
-export const GameConfigurationState = getModule(GameConfiguration, rootStore);
-export const CurseAddonsState = getModule(CurseAddons, rootStore);
-export const AddonSearchState = getModule(AddonSearch, rootStore);
+export default store;
+export const GameConfigurationState = new GameConfiguration({
+  store,
+  name: "GameConfiguration"
+});
+/*export const CurseAddonsState = new CurseAddons({
+  store,
+  name: "CurseAddons"
+});*/
+export const AddonSearchState = new AddonSearch({ store, name: "AddonSearch" });

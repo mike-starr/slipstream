@@ -1,26 +1,21 @@
-import { Module, VuexModule, Mutation, Action } from "vuex-module-decorators";
-import curseRepository from "@/repositories/CurseRepository";
+import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
+//import {AddonSearchResult, default as curseRepository} from "@/repositories/CurseRepository";
 
+import addonManager from "@/addon/AddonManager";
+import AddonSearchResult from "@/addon/AddonSearchResult";
 
-
-@Module({
-  name: "AddonSearch",
-  namespaced: true
-})
+@Module
 export default class AddonSearch extends VuexModule {
-  searchResults: string[] = [];
+  searchResults: AddonSearchResult[] = [];
 
   @Mutation
-  setSearchResults(searchResults: string[]) {
+  setSearchResults(searchResults: AddonSearchResult[]) {
     this.searchResults = searchResults;
   }
 
-
   @Action
-  search(searchTerm: string) {
-    curseRepository.searchAddons(searchTerm).then((addons) => {
-      console.log("results from " + searchTerm + " results: " + addons);
-    });
-    console.log("done: " + searchTerm);
+  async search(searchTerm: string) {
+    const results = await addonManager.search(searchTerm, "retail");
+    this.setSearchResults(results);
   }
 }

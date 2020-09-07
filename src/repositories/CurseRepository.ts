@@ -1,6 +1,12 @@
 import axios from "axios";
 import fs from "fs";
 
+export interface AddonSearchResult {
+  id: number;
+  title: string;
+  summary: string;
+  thumbnailUrl: string;
+}
 
 enum CurseReleaseType {
   Release = 1,
@@ -42,6 +48,8 @@ class CurseRepository {
   private static readonly baseApiUrl = "https://addons-ecs.forgesvc.net/api/v2";
   private static readonly databaseFilename = "curse_addon_database.json";
   private static readonly maxAddons = 15000;
+
+  private databaseDirectory = "";
 
   private addonDatabase: CurseAddonDatabase = {
     classic: {
@@ -89,8 +97,10 @@ class CurseRepository {
   }*/
 
   async initialize(databaseDirectory: string) {
+    this.databaseDirectory = databaseDirectory;
+
     const curseAddonFile = await fs.promises.readFile(
-      databaseDirectory + "/all_curse_addons.json"
+      this.databaseDirectory + "/all_curse_addons.json"
     );
     const response = { data: JSON.parse(curseAddonFile.toString()) };
 
@@ -278,14 +288,61 @@ class CurseRepository {
     };
   }
 
-  searchAddons(searchTerm: string) {
-    //this.createAddonSearchRequest(0, 50, searchTerm);
+  async searchAddons(searchTerm: string): Promise<AddonSearchResult[]> {
+    const searchResponseJSON = await axios.get(
+      this.createAddonSearchRequest(0, 50, searchTerm)
+    );
+
+    /*const searchResponse = await fs.promises.readFile(
+      this.databaseDirectory + "/curse_search_result.json"
+    );
+
+    const searchResponseJSON = { data: JSON.parse(searchResponse.toString()) };*/
 
     console.log(`searching for ${searchTerm}`);
 
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(["1", "2", "3"]), 2000);
-    });
+    const jsonResults = searchResponseJSON.data.filter((addon: any) =>
+      addon.name.toLowerCase().startsWith(searchTerm.toLowerCase())
+    );
+
+    const searchResults = [];
+
+    for (const addon of jsonResults) {
+      const latestFile = this.latestFileForFlavor(addon, "retail");
+      if (latestFile) {
+        const thumbnailUrl = (addon.categories.find(
+          (category: any) => category.categoryId === addon.primaryCategoryId
+        ) || addon.categories[0]).avatarUrl;
+
+        searchResults.push({
+          id: addon.id,
+          title: addon.name,
+          summary: addon.summary,
+          thumbnailUrl: thumbnailUrl
+        });
+      }
+    }
+
+    return searchResults;
+  }
+
+  private latestFileForFlavor(addon: any, gameFlavor: GameFlavor) {
+    for (const latestFile of addon.latestFiles) {
+      if (
+        latestFile.releaseType !== CurseReleaseType.Release ||
+        latestFile.isAlternate
+      ) {
+        // Ignoring beta/alpha channels for now, and "alternate" releases.
+        continue;
+      }
+
+      const flavor: GameFlavor =
+        latestFile.gameVersionFlavor === "wow_classic" ? "classic" : "retail";
+
+      if (flavor === gameFlavor) {
+        return latestFile;
+      }
+    }
   }
 
   private createAddonSearchRequest(
@@ -311,4 +368,4 @@ class CurseRepository {
   }
 }
 
-export default new CurseRepository();
+//export default new CurseRepository();

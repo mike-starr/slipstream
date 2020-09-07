@@ -1,0 +1,1 @@
+export type GameFlavor = "classic" | "retail";
