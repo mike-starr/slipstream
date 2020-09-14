@@ -49,7 +49,7 @@
               </v-card>
             </v-col>-->
             <v-col cols="4"
-              ><v-btn color="primary" @click.stop="">Install</v-btn></v-col
+              ><v-btn color="primary" @click.stop="installButtonClicked(searchResult)">Install</v-btn></v-col
             >
           </v-row>
         </v-expansion-panel-header>
@@ -64,6 +64,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { AddonSearchState } from "@/store/index";
+import AddonSearchResult from "@/addon/AddonSearchResult";
 
 @Component
 export default class AddonSearchResults extends Vue {
@@ -76,6 +77,10 @@ export default class AddonSearchResults extends Vue {
   @Watch("searchResults")
   onSearchResultsChanged() {
     this.expansionPanel = undefined;
+  }
+
+  installButtonClicked(searchResult: AddonSearchResult) {
+    console.log(`Install: ${searchResult.title}`);
   }
 }
 </script>

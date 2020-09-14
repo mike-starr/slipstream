@@ -48,6 +48,10 @@ class AddonManger {
     // add to config and save when installing an addon.
   }
 
+  async install() {
+    console.log("addonmanager install");
+  }
+
   async search(
     searchTerm: string,
     gameFlavor: GameFlavor
