@@ -1,5 +1,6 @@
-import AddonSearchResult from "./AddonSearchResult";
+import AddonReference from "./AddonReference";
 import CurseRepository from "./repositories/CurseRepository";
+import AddonRepository from "./repositories/AddonRepository";
 import { GameFlavor } from "@/addon/GameFlavor";
 import fs from "fs";
 
@@ -25,8 +26,14 @@ interface InstalledAddon {
   repository: string;
 }
 
+interface RepositoryMap {
+  [key: string]: AddonRepository;
+}
+
 class AddonManger {
-  private readonly repositories = [new CurseRepository()];
+  private readonly repositories: RepositoryMap = {
+    curse: new CurseRepository()
+  };
   private configuration: Configuration = {
     version: configurationVersion,
     registry: {}
@@ -44,25 +51,26 @@ class AddonManger {
 
     const fileBuffer = await fs.promises.readFile(filename);
     this.configuration = JSON.parse(fileBuffer.toString());
-
-    // add to config and save when installing an addon.
   }
 
-  async install() {
-    console.log("addonmanager install");
+  async install(addon: AddonReference, rootDirectory: string) {
+    console.log(`installing ${addon.title} to ${rootDirectory}`);
+
+    // download the zip to temp dir, extract + copy over, update config.
+
   }
 
   async search(
     searchTerm: string,
     gameFlavor: GameFlavor
-  ): Promise<AddonSearchResult[]> {
+  ): Promise<AddonReference[]> {
     const results = await Promise.allSettled(
-      this.repositories.map((repository) =>
+      Object.values(this.repositories).map((repository) =>
         repository.search(searchTerm, gameFlavor)
       )
     );
 
-    const fulfilledResults: AddonSearchResult[] = [];
+    const fulfilledResults: AddonReference[] = [];
 
     results.forEach((result) => {
       switch (result.status) {

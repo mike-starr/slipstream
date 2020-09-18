@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import AddonRepository from "./AddonRepository";
-import AddonSearchResult from "@/addon/AddonSearchResult";
+import AddonReference from "@/addon/AddonReference";
 import { GameFlavor } from "@/addon/GameFlavor";
 import {
   createSearchRequest,
@@ -13,7 +13,7 @@ export default class CurseRepository implements AddonRepository {
   async search(
     searchTerm: string,
     gameFlavor: GameFlavor
-  ): Promise<AddonSearchResult[]> {
+  ): Promise<AddonReference[]> {
     const searchResponseJSON = await axios.get(
       createSearchRequest(0, 50, searchTerm)
     );
@@ -31,15 +31,29 @@ export default class CurseRepository implements AddonRepository {
 
         searchResults.push({
           id: addon.id,
+          repository: "curse",
           title: addon.name,
           summary: addon.summary,
-          thumbnailUrl: thumbnailUrl
+          fileUrl: latestFile.downloadUrl,
+          fileDate: latestFile.fileDate,
+          thumbnailUrl: thumbnailUrl,
+          directories: []
         });
       }
     }
 
     return searchResults;
   }
+
+  async getAddonInstallationData(id: number, gameFlavor: GameFlavor): Promise<AddonReference> {
+    // fetch this with curse api? maybe search result should just contain the install data
+    // it's returned anyway - more generic addon info object?
+    // figure it out on paper
+
+    return Promise.reject();
+  }
+
+
 
   private latestFileForFlavor(addon: any, gameFlavor: GameFlavor) {
     for (const latestFile of addon.latestFiles) {

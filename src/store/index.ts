@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import AddonSearch from "@/store/modules/AddonSearch";
 //import CurseAddons from "@/store/modules/CurseAddons";
 import GameConfiguration from "@/store/modules/GameConfiguration";
+import InstalledAddons from "@/store/modules/InstalledAddons";
 
 import { remote } from "electron";
 
@@ -26,3 +27,4 @@ export const GameConfigurationState = new GameConfiguration({
   name: "CurseAddons"
 });*/
 export const AddonSearchState = new AddonSearch({ store, name: "AddonSearch" });
+export const InstalledAddonsState = new InstalledAddons({ store, name: "InstalledAddons" });
