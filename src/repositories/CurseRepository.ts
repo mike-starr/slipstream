@@ -1,4 +1,4 @@
-import axios from "axios";
+//import axios from "axios";
 import fs from "fs";
 
 export interface AddonSearchResult {
@@ -289,15 +289,15 @@ class CurseRepository {
   }
 
   async searchAddons(searchTerm: string): Promise<AddonSearchResult[]> {
-    const searchResponseJSON = await axios.get(
+    /*const searchResponseJSON = await axios.get(
       this.createAddonSearchRequest(0, 50, searchTerm)
-    );
+    );*/
 
-    /*const searchResponse = await fs.promises.readFile(
+    const searchResponse = await fs.promises.readFile(
       this.databaseDirectory + "/curse_search_result.json"
     );
 
-    const searchResponseJSON = { data: JSON.parse(searchResponse.toString()) };*/
+    const searchResponseJSON = { data: JSON.parse(searchResponse.toString()) };
 
     console.log(`searching for ${searchTerm}`);
 

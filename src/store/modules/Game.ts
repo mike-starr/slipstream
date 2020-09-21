@@ -2,7 +2,7 @@ import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
 import path from "path";
 
 @Module
-export default class GameConfiguration extends VuexModule {
+export default class Game extends VuexModule {
   installationRoot = "/Users/mstarr/Documents/wow_root";
   versions: string[] = [];
   selectedVersion = "";

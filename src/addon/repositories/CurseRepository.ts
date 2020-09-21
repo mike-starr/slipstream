@@ -1,4 +1,4 @@
-import axios from "axios";
+import got  from "got";
 
 import AddonRepository from "./AddonRepository";
 import AddonReference from "@/addon/AddonReference";
@@ -14,13 +14,13 @@ export default class CurseRepository implements AddonRepository {
     searchTerm: string,
     gameFlavor: GameFlavor
   ): Promise<AddonReference[]> {
-    const searchResponseJSON = await axios.get(
+    const searchResponseJSON: any = await got.get(
       createSearchRequest(0, 50, searchTerm)
-    );
+    ).json();
 
     const searchResults = [];
 
-    for (const addon of searchResponseJSON.data) {
+    for (const addon of searchResponseJSON) {
       const latestFile = this.latestFileForFlavor(addon, gameFlavor);
       if (latestFile) {
         const thumbnailUrl = (

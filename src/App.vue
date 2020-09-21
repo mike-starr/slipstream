@@ -31,7 +31,10 @@
           <v-divider></v-divider>
         </v-sheet>
 
-        <v-sheet style="flex: 1 0 0; overflow-y:auto">
+        <v-sheet
+          v-if="versions.length > 0"
+          style="flex: 1 0 0; overflow-y:auto"
+        >
           <v-tabs-items v-model="tabs">
             <v-tab-item reverse-transition="false" transition="false">
               <InstalledAddons />
@@ -52,7 +55,7 @@ import InstalledAddons from "./components/InstalledAddons.vue";
 import AddonSearch from "./components/AddonSearch.vue";
 import AddonSearchResults from "./components/AddonSearchResults.vue";
 import AvatarImage from "./assets/logo.png";
-import { GameConfigurationState } from "@/store/index";
+import { GameState, ApplicationState } from "@/store/index";
 
 @Component({
   components: { InstalledAddons, AddonSearch, AddonSearchResults }
@@ -61,16 +64,18 @@ export default class App extends Vue {
   tabs = null;
 
   get versions() {
-    return GameConfigurationState.versions;
+    return GameState.versions;
   }
 
   onListChange(value: string) {
     console.log("changed " + value);
-    GameConfigurationState.selectVersion(value);
+    GameState.selectVersion(value);
   }
 
   created() {
-    GameConfigurationState.updateVersions();
+    ApplicationState.initialize().then(() => {
+      GameState.updateVersions();
+    });
   }
 }
 </script>
