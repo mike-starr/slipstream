@@ -82,15 +82,19 @@ class AddonManger {
       this.tempDirectory,
       `${addon.id}-${Date.now()}.zip`
     );
+    const extractionDirectory = `${localPath}_extracted`;
 
-    // move this stuff to utility, sanitize progress reporting
-    await this.downloadFile(addon.fileUrl, localPath);
-
-    await streamPipeline(
-      fs.createReadStream(localPath),
-      unzipper.Extract({ path: `${localPath}_extracted` })
+    await this.downloadFile(addon.fileUrl, localPath, (pct) =>
+      console.log(`downloading ${pct * 100}%`)
     );
+    console.log("unzipping");
+    await this.unzipFile(localPath, extractionDirectory);
+    console.log("validating");
+    await this.validateAddon(extractionDirectory, addon);
+    console.log("moving");
+    await this.moveAddonDirectories(extractionDirectory, directory);
 
+    // set up the UI hooks to display status
   }
 
   async search(
@@ -118,18 +122,68 @@ class AddonManger {
     return fulfilledResults;
   }
 
-  private async downloadFile(url: string, localFile: string) {
+  private downloadFile(
+    url: string,
+    localFile: string,
+    progressCallback?: (pctComplete: number) => void
+  ) {
     console.log(`downloading ${url} to ${localFile}`);
 
     return streamPipeline(
       got.stream(url).on("downloadProgress", (progress) => {
-        console.log(
-          `progress: ${progress.percent * 100}% trans: ${
-            progress.transferred
-          } total: ${progress.total}`
-        );
+        if (progressCallback && progress.total && progress.total > 0) {
+          progressCallback(progress.percent);
+        }
       }),
       fs.createWriteStream(localFile)
+    );
+  }
+
+  private unzipFile(filename: string, destinationDirectory: string) {
+    return streamPipeline(
+      fs.createReadStream(filename),
+      unzipper.Extract({ path: destinationDirectory })
+    );
+  }
+
+  private validateAddon(directory: string, addon: AddonReference) {
+    // list stuff in directory, compare to contents of addon reference.
+    return new Promise((resolve) => {
+      resolve();
+    });
+  }
+
+  private async moveAddonDirectories(
+    sourceDirectoryPath: string,
+    destinationDirectoryPath: string
+  ) {
+    const allEntries = await fs.promises.readdir(sourceDirectoryPath, {
+      withFileTypes: true
+    });
+
+    const addonDirectories = allEntries
+      .filter((entry) => entry.isDirectory)
+      .map((entry) => entry.name);
+
+    await Promise.all(
+      addonDirectories.map((directory) => {
+        return fs.promises.rmdir(
+          path.join(destinationDirectoryPath, directory),
+          {
+            recursive: true,
+            maxRetries: 3
+          }
+        );
+      })
+    );
+
+    await Promise.all(
+      addonDirectories.map((directory) => {
+        return fs.promises.rename(
+          path.join(sourceDirectoryPath, directory),
+          path.join(destinationDirectoryPath, directory)
+        );
+      })
     );
   }
 }
