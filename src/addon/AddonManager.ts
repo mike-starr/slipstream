@@ -93,10 +93,13 @@ class AddonManger {
     console.log("unzipping");
 
     await unzipToDirectory(localPath, extractionDirectory, true);
-    console.log("validating");
-    await this.validateAddon(extractionDirectory, addon);
     console.log("moving");
-    await this.moveAddonDirectories(extractionDirectory, directory);
+
+    await this.validateAndMove(
+      extractionDirectory,
+      directory,
+      addon.directories
+    );
 
     console.log("updating config");
     const addonIndex = addonConfig.installedAddons.findIndex(
@@ -168,16 +171,10 @@ class AddonManger {
     );
   }
 
-  private validateAddon(directory: string, addon: AddonReference) {
-    // list stuff in directory, compare to contents of addon reference.
-    return new Promise((resolve) => {
-      resolve();
-    });
-  }
-
-  private async moveAddonDirectories(
+  private async validateAndMove(
     sourceDirectoryPath: string,
-    destinationDirectoryPath: string
+    destinationDirectoryPath: string,
+    expectedDirectories: string[]
   ) {
     const allEntries = await fs.promises.readdir(sourceDirectoryPath, {
       withFileTypes: true
@@ -186,6 +183,12 @@ class AddonManger {
     const addonDirectories = allEntries
       .filter((entry) => entry.isDirectory)
       .map((entry) => entry.name);
+
+    if (!this.validateAddonDirectories(expectedDirectories, addonDirectories)) {
+      throw new Error(
+        `Addon's unzipped contents don't match manifest. Expected ${expectedDirectories} Actual ${addonDirectories}`
+      );
+    }
 
     // problem here if the prior version contained directories the new one does not.
     // need to remove those
@@ -208,6 +211,21 @@ class AddonManger {
           path.join(destinationDirectoryPath, directory)
         );
       })
+    );
+  }
+
+  private validateAddonDirectories(
+    expectedDirectories: string[],
+    actualDirectories: string[]
+  ) {
+    const actualDirectoriesSet = new Set();
+    for (const entry of actualDirectories) {
+      actualDirectoriesSet.add(entry);
+    }
+
+    return (
+      expectedDirectories.length === actualDirectories.length &&
+      expectedDirectories.every((value) => actualDirectoriesSet.has(value))
     );
   }
 

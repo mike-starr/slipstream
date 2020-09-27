@@ -19,12 +19,8 @@ export async function unzipToDirectory(
 
       zipfile!.on("entry", (entry) => {
         if (/\/$/.test(entry.fileName)) {
-          // Directory file names end with '/'.
-          // Note that entries for directories themselves are optional.
-          // An entry's fileName implicitly requires its parent directories to exist.
           zipfile!.readEntry();
         } else {
-          // file entry
           zipfile!.openReadStream(entry, (err, readStream) => {
             if (err) {
               reject(err);
