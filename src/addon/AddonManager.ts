@@ -7,31 +7,30 @@ import got from "got";
 import path from "path";
 import util from "util";
 import stream from "stream";
-import unzipper from "unzipper";
+import { unzipToDirectory } from "@/util/Unzip";
 
 const streamPipeline = util.promisify(stream.pipeline);
 
 const configurationVersion = "1.0";
 const configurationFilename = "config.json";
 
-interface Configuration {
-  registry: AddonRegistry;
+const addonConfigurationVersion = "1.0";
+const addonConfigurationFilename = "slipstream.json";
+
+interface ApplicationConfiguration {
   version: string;
 }
 
-interface AddonRegistry {
-  [key: string]: InstalledAddonList;
-}
-
-interface InstalledAddonList {
-  rootDirectory: string;
-  gameFlavor: GameFlavor;
+interface AddonConfiguration {
+  version: string;
   installedAddons: InstalledAddon[];
 }
 
 interface InstalledAddon {
   id: number;
   repository: string;
+  directories: string[];
+  fileDate: string;
 }
 
 interface RepositoryMap {
@@ -42,13 +41,13 @@ class AddonManger {
   private readonly repositories: RepositoryMap = {
     curse: new CurseRepository()
   };
-  private configuration: Configuration = {
-    version: configurationVersion,
-    registry: {}
-  };
 
   private configurationDirectory = "";
   private tempDirectory = "";
+
+  private configuration: ApplicationConfiguration = {
+    version: configurationVersion
+  };
 
   async initialize(configurationDirectory: string, tempDirectory: string) {
     this.configurationDirectory = configurationDirectory;
@@ -76,7 +75,11 @@ class AddonManger {
   }
 
   async install(addon: AddonReference, directory: string) {
-    console.log(`installing ${addon.title} to ${directory}`);
+    console.log(
+      `installing ${addon.title} to ${directory} folders: ${addon.directories}`
+    );
+
+    const addonConfig = await this.readAddonConfiguration(directory);
 
     const localPath = path.join(
       this.tempDirectory,
@@ -88,12 +91,38 @@ class AddonManger {
       console.log(`downloading ${pct * 100}%`)
     );
     console.log("unzipping");
-    await this.unzipFile(localPath, extractionDirectory);
+
+    await unzipToDirectory(localPath, extractionDirectory, true);
     console.log("validating");
     await this.validateAddon(extractionDirectory, addon);
     console.log("moving");
     await this.moveAddonDirectories(extractionDirectory, directory);
 
+    console.log("updating config");
+    const addonIndex = addonConfig.installedAddons.findIndex(
+      (installedAddon) => {
+        return (
+          installedAddon.id === addon.id &&
+          installedAddon.repository === addon.repository
+        );
+      }
+    );
+
+    const updatedAddonConfig = {
+      id: addon.id,
+      repository: addon.repository,
+      fileDate: addon.fileDate,
+      directories: addon.directories
+    };
+
+    if (addonIndex >= 0) {
+      addonConfig.installedAddons[addonIndex] = updatedAddonConfig;
+    } else {
+      addonConfig.installedAddons.push(updatedAddonConfig);
+    }
+
+    this.writeAddonConfiguration(addonConfig, directory);
+    console.log("installation complete");
     // set up the UI hooks to display status
   }
 
@@ -139,13 +168,6 @@ class AddonManger {
     );
   }
 
-  private unzipFile(filename: string, destinationDirectory: string) {
-    return streamPipeline(
-      fs.createReadStream(filename),
-      unzipper.Extract({ path: destinationDirectory })
-    );
-  }
-
   private validateAddon(directory: string, addon: AddonReference) {
     // list stuff in directory, compare to contents of addon reference.
     return new Promise((resolve) => {
@@ -165,6 +187,8 @@ class AddonManger {
       .filter((entry) => entry.isDirectory)
       .map((entry) => entry.name);
 
+    // problem here if the prior version contained directories the new one does not.
+    // need to remove those
     await Promise.all(
       addonDirectories.map((directory) => {
         return fs.promises.rmdir(
@@ -184,6 +208,34 @@ class AddonManger {
           path.join(destinationDirectoryPath, directory)
         );
       })
+    );
+  }
+
+  private async readAddonConfiguration(
+    directory: string
+  ): Promise<AddonConfiguration> {
+    const filename = path.join(directory, addonConfigurationFilename);
+
+    try {
+      await fs.promises.access(filename, fs.constants.W_OK | fs.constants.R_OK);
+
+      const fileBuffer = await fs.promises.readFile(filename);
+      return JSON.parse(fileBuffer.toString());
+    } catch (error) {
+      return {
+        version: addonConfigurationVersion,
+        installedAddons: []
+      };
+    }
+  }
+
+  private async writeAddonConfiguration(
+    addonConfiguration: AddonConfiguration,
+    directory: string
+  ) {
+    await fs.promises.writeFile(
+      path.join(directory, addonConfigurationFilename),
+      JSON.stringify(addonConfiguration)
     );
   }
 }

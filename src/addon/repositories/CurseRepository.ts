@@ -1,4 +1,4 @@
-import got  from "got";
+import got from "got";
 
 import AddonRepository from "./AddonRepository";
 import AddonReference from "@/addon/AddonReference";
@@ -14,9 +14,9 @@ export default class CurseRepository implements AddonRepository {
     searchTerm: string,
     gameFlavor: GameFlavor
   ): Promise<AddonReference[]> {
-    const searchResponseJSON: any = await got.get(
-      createSearchRequest(0, 50, searchTerm)
-    ).json();
+    const searchResponseJSON: any = await got
+      .get(createSearchRequest(0, 50, searchTerm))
+      .json();
 
     const searchResults = [];
 
@@ -37,7 +37,9 @@ export default class CurseRepository implements AddonRepository {
           fileUrl: latestFile.downloadUrl,
           fileDate: latestFile.fileDate,
           thumbnailUrl: thumbnailUrl,
-          directories: []
+          directories: latestFile.modules.map(
+            (module: any) => module.foldername
+          )
         });
       }
     }
@@ -45,15 +47,16 @@ export default class CurseRepository implements AddonRepository {
     return searchResults;
   }
 
-  async getAddonInstallationData(id: number, gameFlavor: GameFlavor): Promise<AddonReference> {
+  async getAddonInstallationData(
+    id: number,
+    gameFlavor: GameFlavor
+  ): Promise<AddonReference> {
     // fetch this with curse api? maybe search result should just contain the install data
     // it's returned anyway - more generic addon info object?
     // figure it out on paper
 
     return Promise.reject();
   }
-
-
 
   private latestFileForFlavor(addon: any, gameFlavor: GameFlavor) {
     for (const latestFile of addon.latestFiles) {
