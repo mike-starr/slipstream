@@ -30,8 +30,16 @@
               </v-img>
             </v-col>
 
-            <v-col cols="6">{{ searchResult.title }} </v-col>
-            <!--<v-col cols="8">
+            <v-col cols="4">{{ searchResult.title }} </v-col>
+            <v-col cols="2">{{
+              searchResult.status.progress
+                ? searchResult.status.progress.operation +
+                  " " +
+                  searchResult.status.progress.percentage * 100 +
+                  "%"
+                : searchResult.status.state
+            }}</v-col>
+            <!--<v-col cols="8">s
               <v-card color="background">
                 <div class="d-flex flex-no-wrap justify-space-between">
                   <div>
@@ -67,7 +75,7 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
-import { AddonSearchState, InstalledAddonsState } from "@/store/index";
+import { AddonState } from "@/store/index";
 import AddonReference from "@/addon/AddonReference";
 
 @Component
@@ -75,7 +83,7 @@ export default class AddonSearchResults extends Vue {
   expansionPanel: number | undefined = 0;
 
   get searchResults() {
-    return AddonSearchState.searchResults;
+    return AddonState.searchResults;
   }
 
   @Watch("searchResults")
@@ -84,7 +92,7 @@ export default class AddonSearchResults extends Vue {
   }
 
   installButtonClicked(searchResult: AddonReference) {
-    InstalledAddonsState.install(searchResult);
+    AddonState.install(searchResult);
   }
 }
 </script>

@@ -1,10 +1,9 @@
 import Vue from "vue";
 import Vuex from "vuex";
 
-import AddonSearch from "@/store/modules/AddonSearch";
 import Application from "@/store/modules/Application";
 import Game from "@/store/modules/Game";
-import InstalledAddons from "@/store/modules/InstalledAddons";
+import Addon from "@/store/modules/Addon";
 
 Vue.use(Vuex);
 
@@ -18,14 +17,13 @@ export default store;
 
 export const ApplicationState = new Application({
   store,
-  name: "ApplicationState"
+  name: "Application"
 });
 export const GameState = new Game({
   store,
   name: "Game"
 });
-export const AddonSearchState = new AddonSearch({ store, name: "AddonSearch" });
-export const InstalledAddonsState = new InstalledAddons({
+export const AddonState = new Addon({
   store,
-  name: "InstalledAddons"
+  name: "Addon"
 });

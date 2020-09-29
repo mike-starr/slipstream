@@ -16,20 +16,30 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
-import { AddonSearchState } from "@/store/index";
+import { AddonState, GameState } from "@/store/index";
 import Debounce from "@/util/Debounce";
 
 @Component
 export default class AddonSearch extends Vue {
   searchTerm = "";
 
+  get gameFlavor() {
+    return GameState.selectedVersionFlavor;
+  }
+
+  @Watch("gameFlavor")
+  gameFlavorChanged() {
+    AddonState.setSearchResults([]);
+    this.searchTerm = "";
+  }
+
   @Debounce(500)
   @Watch("searchTerm")
   searchTermChanged() {
     if (this.searchTerm.length > 1) {
-      AddonSearchState.search(this.searchTerm);
+      AddonState.search(this.searchTerm);
     } else {
-      AddonSearchState.setSearchResults([]);
+      AddonState.setSearchResults([]);
     }
   }
 }

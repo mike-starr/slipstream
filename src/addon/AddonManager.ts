@@ -1,4 +1,5 @@
 import AddonReference from "./AddonReference";
+import { AddonInstallOperation } from "./AddonStatus";
 import CurseRepository from "./repositories/CurseRepository";
 import AddonRepository from "./repositories/AddonRepository";
 import { GameFlavor } from "@/addon/GameFlavor";
@@ -74,7 +75,11 @@ class AddonManger {
     }
   }
 
-  async install(addon: AddonReference, directory: string) {
+  async install(
+    addon: AddonReference,
+    directory: string,
+    progress: (status: AddonInstallOperation, progress: number) => void
+  ) {
     console.log(
       `installing ${addon.title} to ${directory} folders: ${addon.directories}`
     );
@@ -87,13 +92,19 @@ class AddonManger {
     );
     const extractionDirectory = `${localPath}_extracted`;
 
-    await this.downloadFile(addon.fileUrl, localPath, (pct) =>
-      console.log(`downloading ${pct * 100}%`)
-    );
+    progress("Downloading", 0);
+
+    await this.downloadFile(addon.fileUrl, localPath, (pct) => {
+      progress("Downloading", pct * 0.8);
+    });
     console.log("unzipping");
+
+    progress("Unzipping", 0.8);
 
     await unzipToDirectory(localPath, extractionDirectory, true);
     console.log("moving");
+
+    progress("Finalizing", 0.95);
 
     await this.validateAndMove(
       extractionDirectory,
@@ -126,7 +137,7 @@ class AddonManger {
 
     this.writeAddonConfiguration(addonConfig, directory);
     console.log("installation complete");
-    // set up the UI hooks to display status
+    progress("Finalizing", 1.0);
   }
 
   async search(
@@ -235,8 +246,6 @@ class AddonManger {
     const filename = path.join(directory, addonConfigurationFilename);
 
     try {
-      await fs.promises.access(filename, fs.constants.W_OK | fs.constants.R_OK);
-
       const fileBuffer = await fs.promises.readFile(filename);
       return JSON.parse(fileBuffer.toString());
     } catch (error) {

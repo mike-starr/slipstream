@@ -1,3 +1,5 @@
+import AddonStatus from "./AddonStatus";
+
 export default interface AddonReference {
   readonly id: number;
   readonly repository: string;
@@ -7,4 +9,5 @@ export default interface AddonReference {
   readonly fileDate: string;
   readonly thumbnailUrl: string;
   readonly directories: string[];
+  status: AddonStatus;
 }

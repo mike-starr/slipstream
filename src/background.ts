@@ -10,6 +10,7 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 let win: BrowserWindow | null;
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+app.allowRendererProcessReuse = false;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([

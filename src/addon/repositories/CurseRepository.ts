@@ -8,6 +8,7 @@ import {
   GameVersionFlavor,
   ReleaseType
 } from "@/addon/apis/CurseApi";
+import Addon from "@/store/modules/Addon";
 
 export default class CurseRepository implements AddonRepository {
   async search(
@@ -39,8 +40,11 @@ export default class CurseRepository implements AddonRepository {
           thumbnailUrl: thumbnailUrl,
           directories: latestFile.modules.map(
             (module: any) => module.foldername
-          )
-        });
+          ),
+          status: {
+            state: "NotInstalled"
+          }
+        } as AddonReference);
       }
     }
 
