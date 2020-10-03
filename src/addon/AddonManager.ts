@@ -1,4 +1,4 @@
-import AddonReference from "./AddonReference";
+import AddonDescription from "./AddonDescription";
 import { AddonInstallOperation } from "./AddonStatus";
 import CurseRepository from "./repositories/CurseRepository";
 import AddonRepository from "./repositories/AddonRepository";
@@ -76,7 +76,7 @@ class AddonManger {
   }
 
   async install(
-    addon: AddonReference,
+    addon: AddonDescription,
     directory: string,
     progress: (status: AddonInstallOperation, progress: number) => void
   ) {
@@ -142,15 +142,17 @@ class AddonManger {
 
   async search(
     searchTerm: string,
-    gameFlavor: GameFlavor
-  ): Promise<AddonReference[]> {
+    gameVersion: string
+  ): Promise<AddonDescription[]> {
+    const gameFlavor = gameVersion === "_classic_" ? "classic" : "retail";
+
     const results = await Promise.allSettled(
       Object.values(this.repositories).map((repository) =>
         repository.search(searchTerm, gameFlavor)
       )
     );
 
-    const fulfilledResults: AddonReference[] = [];
+    const fulfilledResults: AddonDescription[] = [];
 
     results.forEach((result) => {
       switch (result.status) {

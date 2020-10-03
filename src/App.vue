@@ -21,30 +21,14 @@
     </v-navigation-drawer>
 
     <v-main>
-      <v-sheet height="100%" class="d-flex flex-column">
-        <v-sheet>
-          <v-tabs v-model="tabs">
-            <v-tab>Installed Addons</v-tab>
-            <v-tab>Search</v-tab>
-          </v-tabs>
-          <AddonSearch v-if="tabs === 1"></AddonSearch>
-          <v-divider></v-divider>
-        </v-sheet>
-
-        <v-sheet
-          v-if="versions.length > 0"
-          style="flex: 1 0 0; overflow-y:auto"
-        >
-          <v-tabs-items v-model="tabs">
-            <v-tab-item reverse-transition="false" transition="false">
-              <InstalledAddons />
-            </v-tab-item>
-            <v-tab-item reverse-transition="false" transition="false"
-              ><AddonSearchResults />
-            </v-tab-item>
-          </v-tabs-items>
-        </v-sheet>
-      </v-sheet>
+      <div
+        style="height: 100%"
+        v-for="version in versions"
+        :key="version"
+        v-show="version === selectedVersion"
+      >
+        <AddonView :gameVersion="version" />
+      </div>
     </v-main>
   </v-app>
 </template>
@@ -52,19 +36,27 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import InstalledAddons from "./components/InstalledAddons.vue";
+import AddonView from "./components/AddonView.vue";
 import AddonSearch from "./components/AddonSearch.vue";
 import AddonSearchResults from "./components/AddonSearchResults.vue";
-import AvatarImage from "./assets/logo.png";
 import { GameState, ApplicationState } from "@/store/index";
 
 @Component({
-  components: { InstalledAddons, AddonSearch, AddonSearchResults }
+  components: { AddonView, InstalledAddons, AddonSearch, AddonSearchResults }
 })
 export default class App extends Vue {
   tabs = null;
 
   get versions() {
     return GameState.versions;
+  }
+
+  get selectedVersion() {
+    return GameState.selectedVersion;
+  }
+
+  isSelectedVersion(version: string) {
+    return version === this.selectedVersion;
   }
 
   onListChange(value: string) {

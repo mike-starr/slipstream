@@ -27,12 +27,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-//import { CurseAddonsState } from "@/store/index";
 
 @Component
-export default class InstalledAddons extends Vue {
-  created() {
-    //CurseAddonsState.initialize();
-  }
-}
+export default class InstalledAddons extends Vue {}
 </script>

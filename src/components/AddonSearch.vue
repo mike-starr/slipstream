@@ -15,31 +15,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
-import { AddonState, GameState } from "@/store/index";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { AddonStateMap } from "@/store/index";
 import Debounce from "@/util/Debounce";
 
 @Component
 export default class AddonSearch extends Vue {
   searchTerm = "";
 
-  get gameFlavor() {
-    return GameState.selectedVersionFlavor;
-  }
-
-  @Watch("gameFlavor")
-  gameFlavorChanged() {
-    AddonState.setSearchResults([]);
-    this.searchTerm = "";
-  }
+  @Prop({ type: String }) readonly gameVersion!: string;
 
   @Debounce(500)
   @Watch("searchTerm")
   searchTermChanged() {
     if (this.searchTerm.length > 1) {
-      AddonState.search(this.searchTerm);
+      AddonStateMap.get(this.gameVersion)?.search(this.searchTerm);
     } else {
-      AddonState.setSearchResults([]);
+      AddonStateMap.get(this.gameVersion)?.setSearchResults([]);
     }
   }
 }

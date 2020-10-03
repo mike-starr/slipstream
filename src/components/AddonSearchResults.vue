@@ -3,13 +3,13 @@
     <v-expansion-panels v-model="expansionPanel">
       <v-expansion-panel
         v-for="searchResult in searchResults"
-        :key="searchResult.id"
+        :key="searchResult.description.id"
       >
         <v-expansion-panel-header>
           <v-row align="center" justify="space-between" no-gutters>
             <v-col cols="2">
               <v-img
-                :src="searchResult.thumbnailUrl"
+                :src="searchResult.description.thumbnailUrl"
                 class="grey lighten-2"
                 width="48"
                 height="48"
@@ -30,7 +30,7 @@
               </v-img>
             </v-col>
 
-            <v-col cols="4">{{ searchResult.title }} </v-col>
+            <v-col cols="4">{{ searchResult.description.title }} </v-col>
             <v-col cols="2">{{
               searchResult.status.progress
                 ? searchResult.status.progress.operation +
@@ -66,7 +66,7 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          {{ searchResult.summary }}
+          {{ searchResult.description.summary }}
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -74,16 +74,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
-import { AddonState } from "@/store/index";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { AddonStateMap } from "@/store/index";
 import AddonReference from "@/addon/AddonReference";
 
 @Component
 export default class AddonSearchResults extends Vue {
   expansionPanel: number | undefined = 0;
 
+  @Prop({ type: String }) readonly gameVersion!: string;
+
   get searchResults() {
-    return AddonState.searchResults;
+    return AddonStateMap.get(this.gameVersion)?.searchResults;
   }
 
   @Watch("searchResults")
@@ -92,7 +94,7 @@ export default class AddonSearchResults extends Vue {
   }
 
   installButtonClicked(searchResult: AddonReference) {
-    AddonState.install(searchResult);
+    AddonStateMap.get(this.gameVersion)?.install(searchResult);
   }
 }
 </script>

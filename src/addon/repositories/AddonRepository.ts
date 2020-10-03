@@ -1,7 +1,6 @@
-import AddonReference from "@/addon/AddonReference";
+import AddonDescription from "@/addon/AddonDescription";
 import { GameFlavor } from "@/addon/GameFlavor";
 
 export default interface AddonRepository {
-  search(searchTerm: string, gameFlavor: GameFlavor): Promise<AddonReference[]>;
-  getAddonInstallationData(id: number, gameFlavor: GameFlavor): Promise<AddonReference>;
+  search(searchTerm: string, gameFlavor: GameFlavor): Promise<AddonDescription[]>;
 }

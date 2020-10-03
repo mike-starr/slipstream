@@ -1,6 +1,6 @@
 import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
+import { updateAddonStates } from "@/store/index";
 import path from "path";
-import { GameFlavor } from "@/addon/GameFlavor";
 
 @Module
 export default class Game extends VuexModule {
@@ -17,10 +17,6 @@ export default class Game extends VuexModule {
     );
   }
 
-  get selectedVersionFlavor(): GameFlavor {
-    return this.selectedVersion === "_classic_" ? "classic" : "retail";
-  }
-
   @Mutation
   setVersions(versions: string[]) {
     this.versions = versions;
@@ -34,5 +30,6 @@ export default class Game extends VuexModule {
   @Action
   async updateVersions() {
     this.setVersions(["_retail_", "_classic_", "_beta_"]);
+    updateAddonStates(["_retail_", "_classic_", "_beta_"]);
   }
 }
