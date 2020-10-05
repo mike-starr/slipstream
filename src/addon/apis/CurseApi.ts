@@ -1,3 +1,5 @@
+import got from "got";
+
 const baseApiUrl = "https://addons-ecs.forgesvc.net/api/v2";
 
 export enum ReleaseType {
@@ -11,10 +13,20 @@ export enum GameVersionFlavor {
   Retail = "wow_retail"
 }
 
-export function createSearchRequest(
+export function search(
+  searchFilter: string,
   index: number,
-  pageSize: number,
-  searchFilter: string
-) {
-  return `${baseApiUrl}/addon/search?gameId=1&index=${index}&pageSize=${pageSize}&searchFilter=${searchFilter}`;
+  pageSize: number
+): any {
+  return got
+    .get(
+      `${baseApiUrl}/addon/search?gameId=1&index=${index}&pageSize=${pageSize}&searchFilter=${searchFilter}`
+    )
+    .json();
+}
+
+export function addonDescriptions(ids: number[]) {
+  return got.post(`${baseApiUrl}/addon`, {
+    json: ids
+  }).json();
 }

@@ -6,16 +6,6 @@ import { remote } from "electron";
 export default class Application extends VuexModule {
   readonly userDataDirectory = remote.app.getPath("userData");
   readonly tempDirectory = remote.app.getPath("temp");
-  /*
-  @Mutation
-  setVersions(versions: string[]) {
-    //this.versions = versions;
-  }
-
-  @Mutation
-  selectVersion(version: string) {
-    //  this.selectedVersion = version;
-  }*/
 
   @Action
   async initialize() {

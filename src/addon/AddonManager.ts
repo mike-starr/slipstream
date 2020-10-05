@@ -2,13 +2,14 @@ import AddonDescription from "./AddonDescription";
 import { AddonInstallOperation } from "./AddonStatus";
 import CurseRepository from "./repositories/CurseRepository";
 import AddonRepository from "./repositories/AddonRepository";
-import { GameFlavor } from "@/addon/GameFlavor";
 import fs from "fs";
 import got from "got";
 import path from "path";
 import util from "util";
 import stream from "stream";
 import { unzipToDirectory } from "@/util/Unzip";
+import { GameFlavor } from "./GameFlavor";
+import Addon from "@/store/modules/Addon";
 
 const streamPipeline = util.promisify(stream.pipeline);
 
@@ -24,14 +25,7 @@ interface ApplicationConfiguration {
 
 interface AddonConfiguration {
   version: string;
-  installedAddons: InstalledAddon[];
-}
-
-interface InstalledAddon {
-  id: number;
-  repository: string;
-  directories: string[];
-  fileDate: string;
+  installedAddons: AddonDescription[];
 }
 
 interface RepositoryMap {
@@ -122,17 +116,10 @@ class AddonManger {
       }
     );
 
-    const updatedAddonConfig = {
-      id: addon.id,
-      repository: addon.repository,
-      fileDate: addon.fileDate,
-      directories: addon.directories
-    };
-
     if (addonIndex >= 0) {
-      addonConfig.installedAddons[addonIndex] = updatedAddonConfig;
+      addonConfig.installedAddons[addonIndex] = addon;
     } else {
-      addonConfig.installedAddons.push(updatedAddonConfig);
+      addonConfig.installedAddons.push(addon);
     }
 
     this.writeAddonConfiguration(addonConfig, directory);
@@ -144,7 +131,7 @@ class AddonManger {
     searchTerm: string,
     gameVersion: string
   ): Promise<AddonDescription[]> {
-    const gameFlavor = gameVersion === "_classic_" ? "classic" : "retail";
+    const gameFlavor = this.flavorForGameVersion(gameVersion);
 
     const results = await Promise.allSettled(
       Object.values(this.repositories).map((repository) =>
@@ -165,6 +152,26 @@ class AddonManger {
     });
 
     return fulfilledResults;
+  }
+
+
+  async findInstalledAddons(directory: string, gameVersion: string) {
+    const addonConfig = await this.readAddonConfiguration(directory);
+    return addonConfig.installedAddons;
+  }
+
+  async findUpdates(addons: AddonDescription[]) {
+    // figure out how this interacts with gameflavor - in practice
+    // all the addons passed to this will have the same flavor but
+    // it's not enforced in abstractions
+
+    /*await this.repositories["curse"].addonDescriptionsForIds(
+      addons.map(addon => addon.id)
+    );*/
+  }
+
+  private flavorForGameVersion(gameVersion: string): GameFlavor {
+    return gameVersion === "_classic_" ? "classic" : "retail";
   }
 
   private downloadFile(

@@ -17,6 +17,15 @@ export default class Game extends VuexModule {
     );
   }
 
+  addonDirectoryForVersion(version: string) {
+    return path.join(
+      this.installationRoot,
+      version,
+      "Interface",
+      "Addons"
+    );
+  }
+
   @Mutation
   setVersions(versions: string[]) {
     this.versions = versions;

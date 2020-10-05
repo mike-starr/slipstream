@@ -1,17 +1,14 @@
 import { VuexModule, Module, Action, Mutation } from "vuex-class-modules";
 import addonManager from "@/addon/AddonManager";
 import { makeAddonStatus, default as AddonStatus } from "@/addon/AddonStatus";
-import {
-  default as AddonReference,
-  createAddonReference
-} from "@/addon/AddonReference";
+import { GameState } from "@/store/index";
+import  AddonReference from "@/addon/AddonReference";
 
 function referenceEqualForStatus(
   first: AddonReference,
   second: AddonReference
 ) {
   return (
-    first.version === second.version &&
     first.description.id === second.description.id &&
     first.description.repository === second.description.repository
   );
@@ -22,9 +19,7 @@ export default class Addon extends VuexModule {
   // needs to be iniitalized from file on load
   // and updated when an install finishes
   installedAddons: AddonReference[] = [];
-
   searchResults: AddonReference[] = [];
-
   gameVersion = "";
 
   @Mutation
@@ -35,6 +30,16 @@ export default class Addon extends VuexModule {
   @Mutation
   setSearchResults(searchResults: AddonReference[]) {
     this.searchResults = searchResults;
+  }
+
+  @Mutation
+  addInstalledAddon(addon: AddonReference) {
+    this.installedAddons.push(addon);
+  }
+
+  @Mutation
+  setInstalledAddons(addons: AddonReference[]) {
+    this.installedAddons = addons;
   }
 
   @Mutation
@@ -49,6 +54,22 @@ export default class Addon extends VuexModule {
   }
 
   @Action
+  async initialize(version: string) {
+    const installedAddons = await addonManager.findInstalledAddons(
+      GameState.addonDirectoryForVersion(version),
+      version
+    );
+    this.setInstalledAddons(
+      installedAddons.map((description) => {
+        return {
+          description,
+          status: makeAddonStatus("UpToDate")
+        };
+      })
+    );
+  }
+
+  @Action
   async search(searchTerm: string) {
     const searchResults = await addonManager.search(
       searchTerm,
@@ -57,11 +78,10 @@ export default class Addon extends VuexModule {
 
     this.setSearchResults(
       searchResults.map((description) => {
-        const reference = createAddonReference(
+        const reference = {
           description,
-          this.gameVersion,
-          makeAddonStatus("NotInstalled")
-        );
+          status: makeAddonStatus("NotInstalled")
+        };
         const status = this.installedAddons.find((installedAddon) =>
           referenceEqualForStatus(installedAddon, reference)
         )?.status;
@@ -85,7 +105,7 @@ export default class Addon extends VuexModule {
 
       await addonManager.install(
         addon.description,
-        addon.version, // this isn't the installation directory, derive from the root dir in GameState
+        GameState.addonDirectoryForVersion(this.gameVersion),
         (operation, percentage) => {
           this.updateAddonStatus({
             addon,
@@ -94,7 +114,8 @@ export default class Addon extends VuexModule {
         }
       );
 
-      this.updateAddonStatus({ addon, status: makeAddonStatus("Installed") });
+      this.updateAddonStatus({ addon, status: makeAddonStatus("UpToDate") });
+      this.addInstalledAddon(addon);
     } catch (error) {
       this.updateAddonStatus({
         addon,

@@ -1,5 +1,6 @@
 export type AddonInstallState =
-  | "Installed"
+  | "UpToDate"
+  | "OutOfDate"
   | "NotInstalled"
   | "Installing"
   | "Updating"
@@ -23,7 +24,7 @@ export function makeAddonStatus(
   state: AddonInstallState,
   progressPercentage?: number,
   progressOperation?: AddonInstallOperation
-) {
+): AddonStatus {
   return {
     state: state,
     progress:

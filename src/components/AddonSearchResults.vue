@@ -39,23 +39,6 @@
                   "%"
                 : searchResult.status.state
             }}</v-col>
-            <!--<v-col cols="8">s
-              <v-card color="background">
-                <div class="d-flex flex-no-wrap justify-space-between">
-                  <div>
-                    <v-card-title
-                      class="headline"
-                      v-text="searchResult.title"
-                    ></v-card-title>
-                    <v-avatar class="ma-3" size="50" tile>
-                      <v-img :src="searchResult.thumbnailUrl"></v-img>
-                    </v-avatar>
-
-
-                  </div>
-                </div>
-              </v-card>
-            </v-col>-->
             <v-col cols="4"
               ><v-btn
                 color="primary"
