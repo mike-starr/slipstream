@@ -69,6 +69,8 @@ class AddonManger {
     }
   }
 
+  // the actual install needs to be queued and serialized on the config
+  // otherwise there will be concurrency problems when multiple addons update/install at once
   async install(
     addon: AddonDescription,
     directory: string,
@@ -154,20 +156,32 @@ class AddonManger {
     return fulfilledResults;
   }
 
-
   async findInstalledAddons(directory: string, gameVersion: string) {
     const addonConfig = await this.readAddonConfiguration(directory);
     return addonConfig.installedAddons;
   }
 
-  async findUpdates(addons: AddonDescription[]) {
-    // figure out how this interacts with gameflavor - in practice
-    // all the addons passed to this will have the same flavor but
-    // it's not enforced in abstractions
+  async latestVersionForAddons(
+    addons: AddonDescription[]
+  ): Promise<AddonDescription[]> {
+    if (addons.length === 0) {
+      return [];
+    }
 
-    /*await this.repositories["curse"].addonDescriptionsForIds(
-      addons.map(addon => addon.id)
-    );*/
+    if (!addons.every((addon) => addon.gameFlavor === addons[0].gameFlavor)) {
+      console.log(`flavors`);
+      addons.forEach((addon) => {
+        console.log(`flavor: ${addon.gameFlavor}`);
+      });
+      throw new Error(
+        "All addons passed to findAddonUpdates must have the same game flavor."
+      );
+    }
+
+    return this.repositories["curse"].addonDescriptionsForIds(
+      addons.map((addon) => addon.id),
+      addons[0].gameFlavor
+    );
   }
 
   private flavorForGameVersion(gameVersion: string): GameFlavor {

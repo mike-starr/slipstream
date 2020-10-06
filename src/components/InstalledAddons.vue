@@ -84,7 +84,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { AddonStateMap } from "@/store/index";
 import AddonReference from "@/addon/AddonReference";
 
@@ -98,10 +98,10 @@ export default class InstalledAddons extends Vue {
     return AddonStateMap.get(this.gameVersion)?.installedAddons;
   }
 
-  /*@Watch("installedAddons")
+  @Watch("installedAddons")
   onInstalledAddonsChanged() {
     this.expansionPanel = undefined;
-  }*/
+  }
 
   installButtonClicked(installedAddon: AddonReference) {
     //AddonStateMap.get(this.gameVersion)?.install(installedAddon);
@@ -109,7 +109,11 @@ export default class InstalledAddons extends Vue {
   }
 
   created() {
-    AddonStateMap.get(this.gameVersion)?.initialize(this.gameVersion);
+    AddonStateMap.get(this.gameVersion)
+      ?.initialize(this.gameVersion)
+      .then(() => {
+        AddonStateMap.get(this.gameVersion)?.checkForUpdates();
+      });
   }
 }
 </script>

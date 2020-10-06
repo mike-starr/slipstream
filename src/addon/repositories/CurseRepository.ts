@@ -45,10 +45,6 @@ export default class CurseRepository implements AddonRepository {
   ): Promise<AddonDescription[]> {
     const response = await CurseApi.addonDescriptions(ids);
 
-   /* console.log(
-      `response ${descriptions.map((entry) => JSON.stringify(entry))}`
-    );*/
-
     return this.addonDescriptionsFromApiResponse(
       response,
       gameFlavor
@@ -73,6 +69,7 @@ export default class CurseRepository implements AddonRepository {
         searchResults.push({
           id: addon.id,
           repository: "curse",
+          gameFlavor: gameFlavor,
           title: addon.name,
           summary: addon.summary,
           fileUrl: latestFile.downloadUrl,
@@ -81,7 +78,7 @@ export default class CurseRepository implements AddonRepository {
           directories: latestFile.modules.map(
             (module: any) => module.foldername
           )
-        } as AddonDescription);
+        });
       }
     }
 

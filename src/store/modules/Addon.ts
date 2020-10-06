@@ -2,7 +2,8 @@ import { VuexModule, Module, Action, Mutation } from "vuex-class-modules";
 import addonManager from "@/addon/AddonManager";
 import { makeAddonStatus, default as AddonStatus } from "@/addon/AddonStatus";
 import { GameState } from "@/store/index";
-import  AddonReference from "@/addon/AddonReference";
+import AddonReference from "@/addon/AddonReference";
+import AddonDescription from '@/addon/AddonDescription';
 
 function referenceEqualForStatus(
   first: AddonReference,
@@ -53,6 +54,15 @@ export default class Addon extends VuexModule {
     // go through installed addons and update their status too.
   }
 
+  @Mutation
+  updateAddonUpdateAvailability(params: {
+    addon: AddonReference;
+    latestVersion: AddonDescription;
+  }) {
+    params.addon.latestVersion = params.latestVersion;
+    params.addon.status.state = "OutOfDate";
+  }
+
   @Action
   async initialize(version: string) {
     const installedAddons = await addonManager.findInstalledAddons(
@@ -67,6 +77,29 @@ export default class Addon extends VuexModule {
         };
       })
     );
+  }
+
+  @Action
+  async checkForUpdates() {
+    for (const addon of this.installedAddons.map(a => a.description)) {
+      console.log(`addon: ${JSON.stringify(addon)}`);
+    }
+
+    const latestAddons = await addonManager.latestVersionForAddons(
+      this.installedAddons.map((addon) => addon.description)
+    );
+
+    for (const installedAddon of this.installedAddons) {
+      const latestAddon = latestAddons.find(
+        (addon) =>
+          addon.id === installedAddon.description.id &&
+          addon.repository === installedAddon.description.repository
+      );
+
+      if (latestAddon && latestAddon.fileDate !== installedAddon.description.fileDate) {
+        this.updateAddonUpdateAvailability({addon: installedAddon, latestVersion: latestAddon});
+      }
+    }
   }
 
   @Action
