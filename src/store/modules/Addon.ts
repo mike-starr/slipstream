@@ -17,8 +17,6 @@ function referenceEqualForStatus(
 
 @Module
 export default class Addon extends VuexModule {
-  // needs to be iniitalized from file on load
-  // and updated when an install finishes
   installedAddons: AddonReference[] = [];
   searchResults: AddonReference[] = [];
   gameVersion = "";

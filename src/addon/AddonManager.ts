@@ -71,6 +71,8 @@ class AddonManger {
 
   // the actual install needs to be queued and serialized on the config
   // otherwise there will be concurrency problems when multiple addons update/install at once
+  // could maybe just make the the config update synchronous?
+  // look into promise based task queues in javascript
   async install(
     addon: AddonDescription,
     directory: string,
