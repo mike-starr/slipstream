@@ -3,7 +3,7 @@ import addonManager from "@/addon/AddonManager";
 import { makeAddonStatus, default as AddonStatus } from "@/addon/AddonStatus";
 import { GameState } from "@/store/index";
 import AddonReference from "@/addon/AddonReference";
-import AddonDescription from '@/addon/AddonDescription';
+import AddonDescription from "@/addon/AddonDescription";
 
 function referenceEqualForStatus(
   first: AddonReference,
@@ -41,6 +41,8 @@ export default class Addon extends VuexModule {
     this.installedAddons = addons;
   }
 
+  // this is really slow for high frequency download progress updates.
+  // we lose status updates when the search result is cleared.
   @Mutation
   updateAddonStatus(params: { addon: AddonReference; status: AddonStatus }) {
     this.searchResults
@@ -64,8 +66,7 @@ export default class Addon extends VuexModule {
   @Action
   async initialize(version: string) {
     const installedAddons = await addonManager.findInstalledAddons(
-      GameState.addonDirectoryForVersion(version),
-      version
+      GameState.addonDirectoryForVersion(version)
     );
     this.setInstalledAddons(
       installedAddons.map((description) => {
@@ -79,7 +80,7 @@ export default class Addon extends VuexModule {
 
   @Action
   async checkForUpdates() {
-    for (const addon of this.installedAddons.map(a => a.description)) {
+    for (const addon of this.installedAddons.map((a) => a.description)) {
       console.log(`addon: ${JSON.stringify(addon)}`);
     }
 
@@ -94,8 +95,14 @@ export default class Addon extends VuexModule {
           addon.repository === installedAddon.description.repository
       );
 
-      if (latestAddon && latestAddon.fileDate !== installedAddon.description.fileDate) {
-        this.updateAddonUpdateAvailability({addon: installedAddon, latestVersion: latestAddon});
+      if (
+        latestAddon &&
+        latestAddon.fileDate !== installedAddon.description.fileDate
+      ) {
+        this.updateAddonUpdateAvailability({
+          addon: installedAddon,
+          latestVersion: latestAddon
+        });
       }
     }
   }

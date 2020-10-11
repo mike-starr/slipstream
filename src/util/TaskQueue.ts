@@ -1,18 +1,18 @@
-type TaskGenerator = () => Promise<any>;
+type TaskGenerator<T> = () => Promise<T>;
 
-type QueueItem = {
-  generator: TaskGenerator;
+type QueueItem<T> = {
+  generator: TaskGenerator<T>;
   resolve: (value?: unknown) => void;
   reject: (reason?: any) => void;
 };
 
-export default class TaskQueue {
-  private tasks: QueueItem[] = [];
+export default class TaskQueue<T = void> {
+  private tasks: QueueItem<T>[] = [];
   private concurrency = 0;
 
   constructor(private readonly concurrencyLimit: number = 1) {}
 
-  enqueue(generator: TaskGenerator) {
+  enqueue(generator: TaskGenerator<T>) {
     return new Promise((resolve, reject) => {
       this.tasks.push({
         generator,
@@ -24,23 +24,25 @@ export default class TaskQueue {
     });
   }
 
-  process() {
-    while (this.tasks.length > 0 && this.concurrency < this.concurrencyLimit) {
-      ++this.concurrency;
-      const queueItem = this.tasks.shift()!;
-
-      queueItem
-        .generator()
-        .then((value) => {
-          queueItem.resolve(value);
-        })
-        .catch((error) => {
-          queueItem.reject(error);
-        })
-        .finally(() => {
-          --this.concurrency;
-          this.process();
-        });
+  private process() {
+    if (!(this.tasks.length > 0 && this.concurrency < this.concurrencyLimit)) {
+      return;
     }
+
+    ++this.concurrency;
+    const queueItem = this.tasks.shift()!;
+
+    queueItem
+      .generator()
+      .then((value) => {
+        queueItem.resolve(value);
+      })
+      .catch((error) => {
+        queueItem.reject(error);
+      })
+      .finally(() => {
+        --this.concurrency;
+        this.process();
+      });
   }
 }

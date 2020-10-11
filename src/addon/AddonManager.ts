@@ -9,7 +9,7 @@ import util from "util";
 import stream from "stream";
 import { unzipToDirectory } from "@/util/Unzip";
 import { GameFlavor } from "./GameFlavor";
-import Addon from "@/store/modules/Addon";
+import TaskQueue from "@/util/TaskQueue";
 
 const streamPipeline = util.promisify(stream.pipeline);
 
@@ -18,6 +18,8 @@ const configurationFilename = "config.json";
 
 const addonConfigurationVersion = "1.0";
 const addonConfigurationFilename = "slipstream.json";
+
+const maxConcurrentDownloads = 3;
 
 interface ApplicationConfiguration {
   version: string;
@@ -39,6 +41,8 @@ class AddonManger {
 
   private configurationDirectory = "";
   private tempDirectory = "";
+  private downloadQueue = new TaskQueue(maxConcurrentDownloads);
+  private configurationUpdateQueue = new TaskQueue();
 
   private configuration: ApplicationConfiguration = {
     version: configurationVersion
@@ -69,10 +73,6 @@ class AddonManger {
     }
   }
 
-  // the actual install needs to be queued and serialized on the config
-  // otherwise there will be concurrency problems when multiple addons update/install at once
-  // could maybe just make the the config update synchronous?
-  // look into promise based task queues in javascript
   async install(
     addon: AddonDescription,
     directory: string,
@@ -82,8 +82,6 @@ class AddonManger {
       `installing ${addon.title} to ${directory} folders: ${addon.directories}`
     );
 
-    const addonConfig = await this.readAddonConfiguration(directory);
-
     const localPath = path.join(
       this.tempDirectory,
       `${addon.id}-${Date.now()}.zip`
@@ -92,15 +90,15 @@ class AddonManger {
 
     progress("Downloading", 0);
 
-    await this.downloadFile(addon.fileUrl, localPath, (pct) => {
-      progress("Downloading", pct * 0.8);
+    await this.downloadQueue.enqueue(() => {
+      return this.downloadFile(addon.fileUrl, localPath, (pct) => {
+        progress("Downloading", pct * 0.8);
+      });
     });
-    console.log("unzipping");
 
     progress("Unzipping", 0.8);
 
     await unzipToDirectory(localPath, extractionDirectory, true);
-    console.log("moving");
 
     progress("Finalizing", 0.95);
 
@@ -110,24 +108,10 @@ class AddonManger {
       addon.directories
     );
 
-    console.log("updating config");
-    const addonIndex = addonConfig.installedAddons.findIndex(
-      (installedAddon) => {
-        return (
-          installedAddon.id === addon.id &&
-          installedAddon.repository === addon.repository
-        );
-      }
-    );
+    await this.configurationUpdateQueue.enqueue(() => {
+      return this.updateConfiguration(addon, directory);
+    });
 
-    if (addonIndex >= 0) {
-      addonConfig.installedAddons[addonIndex] = addon;
-    } else {
-      addonConfig.installedAddons.push(addon);
-    }
-
-    this.writeAddonConfiguration(addonConfig, directory);
-    console.log("installation complete");
     progress("Finalizing", 1.0);
   }
 
@@ -158,7 +142,7 @@ class AddonManger {
     return fulfilledResults;
   }
 
-  async findInstalledAddons(directory: string, gameVersion: string) {
+  async findInstalledAddons(directory: string) {
     const addonConfig = await this.readAddonConfiguration(directory);
     return addonConfig.installedAddons;
   }
@@ -171,10 +155,6 @@ class AddonManger {
     }
 
     if (!addons.every((addon) => addon.gameFlavor === addons[0].gameFlavor)) {
-      console.log(`flavors`);
-      addons.forEach((addon) => {
-        console.log(`flavor: ${addon.gameFlavor}`);
-      });
       throw new Error(
         "All addons passed to findAddonUpdates must have the same game flavor."
       );
@@ -205,6 +185,30 @@ class AddonManger {
       }),
       fs.createWriteStream(localFile)
     );
+  }
+
+  private async updateConfiguration(
+    addon: AddonDescription,
+    directory: string
+  ) {
+    const addonConfig = await this.readAddonConfiguration(directory);
+
+    const addonIndex = addonConfig.installedAddons.findIndex(
+      (installedAddon) => {
+        return (
+          installedAddon.id === addon.id &&
+          installedAddon.repository === addon.repository
+        );
+      }
+    );
+
+    if (addonIndex >= 0) {
+      addonConfig.installedAddons[addonIndex] = addon;
+    } else {
+      addonConfig.installedAddons.push(addon);
+    }
+
+    await this.writeAddonConfiguration(addonConfig, directory);
   }
 
   private async validateAndMove(
