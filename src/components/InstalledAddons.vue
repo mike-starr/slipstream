@@ -30,13 +30,13 @@
     <v-expansion-panels v-model="expansionPanel">
       <v-expansion-panel
         v-for="installedAddon in installedAddons"
-        :key="installedAddon.description.id"
+        :key="installedAddon.slipstreamId"
       >
         <v-expansion-panel-header>
           <v-row align="center" justify="space-between" no-gutters>
             <v-col cols="2">
               <v-img
-                :src="installedAddon.description.thumbnailUrl"
+                :src="installedAddon.thumbnailUrl"
                 class="grey lighten-2"
                 width="48"
                 height="48"
@@ -57,14 +57,15 @@
               </v-img>
             </v-col>
 
-            <v-col cols="4">{{ installedAddon.description.title }} </v-col>
+            <v-col cols="4">{{ installedAddon.title }} </v-col>
             <v-col cols="2">{{
-              installedAddon.status.progress
-                ? installedAddon.status.progress.operation +
+              statusMap[installedAddon.slipstreamId].progress
+                ? statusMap[installedAddon.slipstreamId].progress.operation +
                   " " +
-                  installedAddon.status.progress.percentage * 100 +
+                  statusMap[installedAddon.slipstreamId].progress.percentage *
+                    100 +
                   "%"
-                : installedAddon.status.state
+                : statusMap[installedAddon.slipstreamId].state
             }}</v-col>
             <v-col cols="4"
               ><v-btn
@@ -76,7 +77,7 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          {{ installedAddon.description.summary }}
+          {{ installedAddon.summary }}
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -86,7 +87,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { AddonStateMap } from "@/store/index";
-import AddonReference from "@/addon/AddonReference";
+import AddonDescription from "@/addon/AddonDescription";
 
 @Component
 export default class InstalledAddons extends Vue {
@@ -98,12 +99,16 @@ export default class InstalledAddons extends Vue {
     return AddonStateMap.get(this.gameVersion)?.installedAddons;
   }
 
+  get statusMap() {
+    return AddonStateMap.get(this.gameVersion)?.addonStatus;
+  }
+
   @Watch("installedAddons")
   onInstalledAddonsChanged() {
     this.expansionPanel = undefined;
   }
 
-  installButtonClicked(installedAddon: AddonReference) {
+  installButtonClicked(installedAddon: AddonDescription) {
     //AddonStateMap.get(this.gameVersion)?.install(installedAddon);
     console.log("Update addon");
   }

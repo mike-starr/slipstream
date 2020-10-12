@@ -3,13 +3,13 @@
     <v-expansion-panels v-model="expansionPanel">
       <v-expansion-panel
         v-for="searchResult in searchResults"
-        :key="searchResult.description.id"
+        :key="searchResult.slipstreamId"
       >
         <v-expansion-panel-header>
           <v-row align="center" justify="space-between" no-gutters>
             <v-col cols="2">
               <v-img
-                :src="searchResult.description.thumbnailUrl"
+                :src="searchResult.thumbnailUrl"
                 class="grey lighten-2"
                 width="48"
                 height="48"
@@ -30,14 +30,15 @@
               </v-img>
             </v-col>
 
-            <v-col cols="4">{{ searchResult.description.title }} </v-col>
+            <v-col cols="4">{{ searchResult.title }} </v-col>
             <v-col cols="2">{{
-              searchResult.status.progress
-                ? searchResult.status.progress.operation +
+              statusMap[searchResult.slipstreamId].progress
+                ? statusMap[searchResult.slipstreamId].progress.operation +
                   " " +
-                  searchResult.status.progress.percentage * 100 +
+                  statusMap[searchResult.slipstreamId].progress.percentage *
+                    100 +
                   "%"
-                : searchResult.status.state
+                : statusMap[searchResult.slipstreamId].state
             }}</v-col>
             <v-col cols="4"
               ><v-btn
@@ -49,7 +50,7 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          {{ searchResult.description.summary }}
+          {{ searchResult.summary }}
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -59,7 +60,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { AddonStateMap } from "@/store/index";
-import AddonReference from "@/addon/AddonReference";
+import AddonDescription from "@/addon/AddonDescription";
 
 @Component
 export default class AddonSearchResults extends Vue {
@@ -71,12 +72,16 @@ export default class AddonSearchResults extends Vue {
     return AddonStateMap.get(this.gameVersion)?.searchResults;
   }
 
+  get statusMap() {
+    return AddonStateMap.get(this.gameVersion)?.addonStatus;
+  }
+
   @Watch("searchResults")
   onSearchResultsChanged() {
     this.expansionPanel = undefined;
   }
 
-  installButtonClicked(searchResult: AddonReference) {
+  installButtonClicked(searchResult: AddonDescription) {
     AddonStateMap.get(this.gameVersion)?.install(searchResult);
   }
 }

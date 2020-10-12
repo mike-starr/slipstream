@@ -1,24 +1,20 @@
+import Vue from "vue";
 import { VuexModule, Module, Action, Mutation } from "vuex-class-modules";
 import addonManager from "@/addon/AddonManager";
 import { makeAddonStatus, default as AddonStatus } from "@/addon/AddonStatus";
 import { GameState } from "@/store/index";
-import AddonReference from "@/addon/AddonReference";
 import AddonDescription from "@/addon/AddonDescription";
-
-function referenceEqualForStatus(
-  first: AddonReference,
-  second: AddonReference
-) {
-  return (
-    first.description.id === second.description.id &&
-    first.description.repository === second.description.repository
-  );
-}
 
 @Module
 export default class Addon extends VuexModule {
-  installedAddons: AddonReference[] = [];
-  searchResults: AddonReference[] = [];
+  installedAddons: AddonDescription[] = [];
+  searchResults: AddonDescription[] = [];
+  addonStatus: {
+    [key: string]: AddonStatus;
+  } = {};
+  latestAddonVersions: {
+    [key: string]: AddonDescription;
+  } = {};
   gameVersion = "";
 
   @Mutation
@@ -27,40 +23,35 @@ export default class Addon extends VuexModule {
   }
 
   @Mutation
-  setSearchResults(searchResults: AddonReference[]) {
+  setSearchResults(searchResults: AddonDescription[]) {
     this.searchResults = searchResults;
   }
 
   @Mutation
-  addInstalledAddon(addon: AddonReference) {
+  addInstalledAddon(addon: AddonDescription) {
     this.installedAddons.push(addon);
   }
 
   @Mutation
-  setInstalledAddons(addons: AddonReference[]) {
+  setInstalledAddons(addons: AddonDescription[]) {
     this.installedAddons = addons;
   }
 
-  // this is really slow for high frequency download progress updates.
-  // we lose status updates when the search result is cleared.
   @Mutation
-  updateAddonStatus(params: { addon: AddonReference; status: AddonStatus }) {
-    this.searchResults
-      .filter((result) => referenceEqualForStatus(result, params.addon))
-      .forEach((result) => {
-        result.status = params.status;
-      });
-
-    // go through installed addons and update their status too.
+  updateAddonStatus(params: { addon: AddonDescription; status: AddonStatus }) {
+    Vue.set(this.addonStatus, params.addon.slipstreamId, params.status);
   }
 
   @Mutation
   updateAddonUpdateAvailability(params: {
-    addon: AddonReference;
+    addon: AddonDescription;
     latestVersion: AddonDescription;
   }) {
-    params.addon.latestVersion = params.latestVersion;
-    params.addon.status.state = "OutOfDate";
+    Vue.set(
+      this.latestAddonVersions,
+      params.addon.slipstreamId,
+      params.latestVersion
+    );
   }
 
   @Action
@@ -68,37 +59,30 @@ export default class Addon extends VuexModule {
     const installedAddons = await addonManager.findInstalledAddons(
       GameState.addonDirectoryForVersion(version)
     );
-    this.setInstalledAddons(
-      installedAddons.map((description) => {
-        return {
-          description,
-          status: makeAddonStatus("UpToDate")
-        };
-      })
-    );
+
+    for (const addon of installedAddons) {
+      this.updateAddonStatus({ addon, status: makeAddonStatus("UpToDate") });
+    }
+
+    this.setInstalledAddons(installedAddons);
   }
 
   @Action
   async checkForUpdates() {
-    for (const addon of this.installedAddons.map((a) => a.description)) {
+    for (const addon of this.installedAddons) {
       console.log(`addon: ${JSON.stringify(addon)}`);
     }
 
     const latestAddons = await addonManager.latestVersionForAddons(
-      this.installedAddons.map((addon) => addon.description)
+      this.installedAddons
     );
 
     for (const installedAddon of this.installedAddons) {
       const latestAddon = latestAddons.find(
-        (addon) =>
-          addon.id === installedAddon.description.id &&
-          addon.repository === installedAddon.description.repository
+        (addon) => addon.slipstreamId === installedAddon.slipstreamId
       );
 
-      if (
-        latestAddon &&
-        latestAddon.fileDate !== installedAddon.description.fileDate
-      ) {
+      if (latestAddon && latestAddon.fileDate !== installedAddon.fileDate) {
         this.updateAddonUpdateAvailability({
           addon: installedAddon,
           latestVersion: latestAddon
@@ -114,27 +98,20 @@ export default class Addon extends VuexModule {
       this.gameVersion
     );
 
-    this.setSearchResults(
-      searchResults.map((description) => {
-        const reference = {
-          description,
+    for (const result of searchResults) {
+      if (!this.addonStatus[result.slipstreamId]) {
+        this.updateAddonStatus({
+          addon: result,
           status: makeAddonStatus("NotInstalled")
-        };
-        const status = this.installedAddons.find((installedAddon) =>
-          referenceEqualForStatus(installedAddon, reference)
-        )?.status;
+        });
+      }
+    }
 
-        if (status) {
-          reference.status = status;
-        }
-
-        return reference;
-      })
-    );
+    this.setSearchResults(searchResults);
   }
 
   @Action
-  async install(addon: AddonReference) {
+  async install(addon: AddonDescription) {
     try {
       this.updateAddonStatus({
         addon,
@@ -142,13 +119,21 @@ export default class Addon extends VuexModule {
       });
 
       await addonManager.install(
-        addon.description,
+        addon,
         GameState.addonDirectoryForVersion(this.gameVersion),
         (operation, percentage) => {
-          this.updateAddonStatus({
-            addon,
-            status: makeAddonStatus("Installing", percentage, operation)
-          });
+          if (
+            percentage >= 100 ||
+            percentage -
+              (this.addonStatus[addon.slipstreamId]?.progress?.percentage ||
+                0) >
+              .01
+          ) {
+            this.updateAddonStatus({
+              addon,
+              status: makeAddonStatus("Installing", percentage, operation)
+            });
+          }
         }
       );
 
