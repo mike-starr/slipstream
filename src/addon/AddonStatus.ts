@@ -1,9 +1,7 @@
 export type AddonInstallState =
-  | "UpToDate"
-  | "OutOfDate"
+  | "Installed"
   | "NotInstalled"
   | "Installing"
-  | "Updating"
   | "Error";
 
 export type AddonInstallOperation =

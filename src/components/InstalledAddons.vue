@@ -67,6 +67,7 @@
                   "%"
                 : statusMap[installedAddon.slipstreamId].state
             }}</v-col>
+            <!-- figure out when to display update button -->
             <v-col cols="4"
               ><v-btn
                 color="primary"
@@ -96,7 +97,15 @@ export default class InstalledAddons extends Vue {
   @Prop({ type: String }) readonly gameVersion!: string;
 
   get installedAddons() {
-    return AddonStateMap.get(this.gameVersion)?.installedAddons;
+    return Object.values(
+      AddonStateMap.get(this.gameVersion)?.installedAddons || {}
+    );
+  }
+
+  get latestAddons() {
+    return Object.values(
+      AddonStateMap.get(this.gameVersion)?.latestAddons || {}
+    );
   }
 
   get statusMap() {
@@ -108,9 +117,8 @@ export default class InstalledAddons extends Vue {
     this.expansionPanel = undefined;
   }
 
-  installButtonClicked(installedAddon: AddonDescription) {
-    //AddonStateMap.get(this.gameVersion)?.install(installedAddon);
-    console.log("Update addon");
+  updateButtonClicked(addon: AddonDescription) {
+    AddonStateMap.get(this.gameVersion)?.update(addon);
   }
 
   created() {

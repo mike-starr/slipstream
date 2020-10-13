@@ -5,17 +5,19 @@ import { makeAddonStatus, default as AddonStatus } from "@/addon/AddonStatus";
 import { GameState } from "@/store/index";
 import AddonDescription from "@/addon/AddonDescription";
 
+type AddonDescriptionMap = {
+  [key: string]: AddonDescription;
+};
+
 @Module
 export default class Addon extends VuexModule {
-  installedAddons: AddonDescription[] = [];
+  gameVersion = "";
+  installedAddons: AddonDescriptionMap = {};
+  latestAddons: AddonDescriptionMap = {};
   searchResults: AddonDescription[] = [];
   addonStatus: {
     [key: string]: AddonStatus;
   } = {};
-  latestAddonVersions: {
-    [key: string]: AddonDescription;
-  } = {};
-  gameVersion = "";
 
   @Mutation
   setVersion(version: string) {
@@ -28,30 +30,18 @@ export default class Addon extends VuexModule {
   }
 
   @Mutation
-  addInstalledAddon(addon: AddonDescription) {
-    this.installedAddons.push(addon);
+  setInstalledAddon(addon: AddonDescription) {
+    Vue.set(this.installedAddons, addon.slipstreamId, addon);
   }
 
   @Mutation
-  setInstalledAddons(addons: AddonDescription[]) {
-    this.installedAddons = addons;
-  }
-
-  @Mutation
-  updateAddonStatus(params: { addon: AddonDescription; status: AddonStatus }) {
+  setAddonStatus(params: { addon: AddonDescription; status: AddonStatus }) {
     Vue.set(this.addonStatus, params.addon.slipstreamId, params.status);
   }
 
   @Mutation
-  updateAddonUpdateAvailability(params: {
-    addon: AddonDescription;
-    latestVersion: AddonDescription;
-  }) {
-    Vue.set(
-      this.latestAddonVersions,
-      params.addon.slipstreamId,
-      params.latestVersion
-    );
+  setLatestAddon(addon: AddonDescription) {
+    Vue.set(this.latestAddons, addon.slipstreamId, addon);
   }
 
   @Action
@@ -61,33 +51,19 @@ export default class Addon extends VuexModule {
     );
 
     for (const addon of installedAddons) {
-      this.updateAddonStatus({ addon, status: makeAddonStatus("UpToDate") });
+      this.setAddonStatus({ addon, status: makeAddonStatus("Installed") });
+      this.setInstalledAddon(addon);
     }
-
-    this.setInstalledAddons(installedAddons);
   }
 
   @Action
   async checkForUpdates() {
-    for (const addon of this.installedAddons) {
-      console.log(`addon: ${JSON.stringify(addon)}`);
-    }
-
     const latestAddons = await addonManager.latestVersionForAddons(
-      this.installedAddons
+      Object.values(this.installedAddons)
     );
 
-    for (const installedAddon of this.installedAddons) {
-      const latestAddon = latestAddons.find(
-        (addon) => addon.slipstreamId === installedAddon.slipstreamId
-      );
-
-      if (latestAddon && latestAddon.fileDate !== installedAddon.fileDate) {
-        this.updateAddonUpdateAvailability({
-          addon: installedAddon,
-          latestVersion: latestAddon
-        });
-      }
+    for (const latestAddon of latestAddons) {
+      this.setLatestAddon(latestAddon);
     }
   }
 
@@ -100,7 +76,7 @@ export default class Addon extends VuexModule {
 
     for (const result of searchResults) {
       if (!this.addonStatus[result.slipstreamId]) {
-        this.updateAddonStatus({
+        this.setAddonStatus({
           addon: result,
           status: makeAddonStatus("NotInstalled")
         });
@@ -113,7 +89,7 @@ export default class Addon extends VuexModule {
   @Action
   async install(addon: AddonDescription) {
     try {
-      this.updateAddonStatus({
+      this.setAddonStatus({
         addon,
         status: makeAddonStatus("Installing", 0, "Initializing")
       });
@@ -127,9 +103,9 @@ export default class Addon extends VuexModule {
             percentage -
               (this.addonStatus[addon.slipstreamId]?.progress?.percentage ||
                 0) >
-              .01
+              0.01
           ) {
-            this.updateAddonStatus({
+            this.setAddonStatus({
               addon,
               status: makeAddonStatus("Installing", percentage, operation)
             });
@@ -137,14 +113,28 @@ export default class Addon extends VuexModule {
         }
       );
 
-      this.updateAddonStatus({ addon, status: makeAddonStatus("UpToDate") });
-      this.addInstalledAddon(addon);
+      this.setAddonStatus({ addon, status: makeAddonStatus("Installed") });
+      this.setInstalledAddon(addon);
     } catch (error) {
-      this.updateAddonStatus({
+      this.setAddonStatus({
         addon,
         status: makeAddonStatus("Error")
       });
       console.log(error);
     }
+  }
+
+  @Action
+  update(addon: AddonDescription) {
+    const latestVersion = this.latestAddons[addon.slipstreamId];
+
+    if (!latestVersion) {
+      console.warn(
+        `No updgrade found for addon: ${addon.title} id: ${addon.slipstreamId}`
+      );
+      return;
+    }
+
+    this.install(latestVersion);
   }
 }
