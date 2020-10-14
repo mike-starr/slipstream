@@ -70,6 +70,7 @@
             <!-- figure out when to display update button -->
             <v-col cols="4"
               ><v-btn
+                v-if="updateAvailable(installedAddon)"
                 color="primary"
                 @click.stop="updateButtonClicked(installedAddon)"
                 >Update</v-btn
@@ -110,6 +111,14 @@ export default class InstalledAddons extends Vue {
 
   get statusMap() {
     return AddonStateMap.get(this.gameVersion)?.addonStatus;
+  }
+
+  updateAvailable(addon: AddonDescription): boolean {
+    const latestAddon = AddonStateMap.get(this.gameVersion)?.latestAddons[
+      addon.slipstreamId
+    ];
+
+    return latestAddon ? latestAddon.fileDate !== addon.fileDate : false;
   }
 
   @Watch("installedAddons")

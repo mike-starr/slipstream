@@ -42,6 +42,9 @@
             }}</v-col>
             <v-col cols="4"
               ><v-btn
+                v-if="
+                  statusMap[searchResult.slipstreamId].state === 'NotInstalled'
+                "
                 color="primary"
                 @click.stop="installButtonClicked(searchResult)"
                 >Install</v-btn
