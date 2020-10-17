@@ -131,11 +131,7 @@ export default class InstalledAddons extends Vue {
   }
 
   created() {
-    AddonStateMap.get(this.gameVersion)
-      ?.initialize(this.gameVersion)
-      .then(() => {
-        AddonStateMap.get(this.gameVersion)?.checkForUpdates();
-      });
+    //AddonStateMap.get(this.gameVersion)?.refresh();
   }
 }
 </script>

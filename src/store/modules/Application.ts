@@ -1,18 +1,32 @@
 import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
 import addonManager from "@/addon/AddonManager";
-import { remote } from "electron";
+import { ipcRenderer } from "electron";
 
 @Module
 export default class Application extends VuexModule {
-  readonly userDataDirectory = remote.app.getPath("userData");
-  readonly tempDirectory = remote.app.getPath("temp");
+  userDataDirectory = "";
+  tempDirectory = "";
+
+  @Mutation
+  setUserDataDirectory(path: string) {
+    this.userDataDirectory = path;
+  }
+
+  @Mutation
+  setTempDirectory(path: string) {
+    this.tempDirectory = path;
+  }
 
   @Action
   async initialize() {
     try {
+      const directories = ipcRenderer.sendSync("get-application-directories");
+      this.setUserDataDirectory(directories.dataDirectory);
+      this.setTempDirectory(directories.tempDirectory);
+
       await addonManager.initialize(this.userDataDirectory, this.tempDirectory);
     } catch (error) {
-      console.log(`Initialization failed: ${error}`);
+      console.error(`Initialization failed: ${error}`);
     }
   }
 }

@@ -1,6 +1,6 @@
 "use strict";
 
-import { app, protocol, BrowserWindow } from "electron";
+import { app, dialog, ipcMain, protocol, BrowserWindow } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -9,7 +9,7 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
 
-app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
 app.allowRendererProcessReuse = false;
 
 // Scheme must be registered before the app is ready
@@ -28,7 +28,6 @@ function createWindow() {
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env
         .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
-      enableRemoteModule: true,
       webSecurity: false
     }
   });
@@ -47,6 +46,25 @@ function createWindow() {
     win = null;
   });
 }
+
+ipcMain.on("get-application-directories", (event) => {
+  event.returnValue = {
+    dataDirectory: app.getPath("userData"),
+    tempDirectory: app.getPath("temp")
+  };
+});
+
+ipcMain.on("open-directory-select-dialog", (event, replyChannel) => {
+  dialog
+    .showOpenDialog(win as BrowserWindow, {
+      properties: ["openDirectory"]
+    })
+    .then((value) => {
+      if (value.filePaths.length > 0) {
+        event.reply(replyChannel, value.filePaths[0]);
+      }
+    });
+});
 
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {

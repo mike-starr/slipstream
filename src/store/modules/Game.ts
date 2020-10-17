@@ -2,24 +2,22 @@ import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
 import { updateAddonStates } from "@/store/index";
 import path from "path";
 
+type GameDirectories = {
+  installationRoot: string;
+  versions: string[];
+};
+
 @Module
 export default class Game extends VuexModule {
-  installationRoot = "/Users/mstarr/Documents/wow_root";
-  versions: string[] = [];
+  gameDirectories: GameDirectories = {
+    installationRoot: "",
+    versions: []
+  };
   selectedVersion = "";
-
-  get selectedVersionRoot() {
-    return path.join(
-      this.installationRoot,
-      this.selectedVersion,
-      "Interface",
-      "Addons"
-    );
-  }
 
   addonDirectoryForVersion(version: string) {
     return path.join(
-      this.installationRoot,
+      this.gameDirectories.installationRoot,
       version,
       "Interface",
       "Addons"
@@ -27,8 +25,8 @@ export default class Game extends VuexModule {
   }
 
   @Mutation
-  setVersions(versions: string[]) {
-    this.versions = versions;
+  setGameDirectories(directories: GameDirectories) {
+    this.gameDirectories = directories;
   }
 
   @Mutation
@@ -37,8 +35,18 @@ export default class Game extends VuexModule {
   }
 
   @Action
-  async updateVersions() {
-    this.setVersions(["_retail_", "_classic_", "_beta_"]);
-    updateAddonStates(["_retail_", "_classic_", "_beta_"]);
+  updateInstallationRoot(path: string) {
+    if (this.gameDirectories.installationRoot === path) {
+      return;
+    }
+
+    const versions = ["_retail_", "_classic_", "_beta_"];
+
+    updateAddonStates(versions);
+
+    this.setGameDirectories({
+      installationRoot: path,
+      versions: versions
+    });
   }
 }

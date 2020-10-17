@@ -35,6 +35,13 @@ export default class Addon extends VuexModule {
   }
 
   @Mutation
+  clear() {
+    this.installedAddons = {};
+    this.searchResults = [];
+    this.addonStatus = {};
+  }
+
+  @Mutation
   setAddonStatus(params: { addon: AddonDescription; status: AddonStatus }) {
     Vue.set(this.addonStatus, params.addon.slipstreamId, params.status);
   }
@@ -45,15 +52,19 @@ export default class Addon extends VuexModule {
   }
 
   @Action
-  async initialize(version: string) {
+  async refresh() {
+    this.clear();
+
     const installedAddons = await addonManager.findInstalledAddons(
-      GameState.addonDirectoryForVersion(version)
+      GameState.addonDirectoryForVersion(this.gameVersion)
     );
 
     for (const addon of installedAddons) {
       this.setAddonStatus({ addon, status: makeAddonStatus("Installed") });
       this.setInstalledAddon(addon);
     }
+
+    await this.checkForUpdates();
   }
 
   @Action
