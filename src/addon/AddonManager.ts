@@ -13,17 +13,10 @@ import TaskQueue from "@/util/TaskQueue";
 
 const streamPipeline = util.promisify(stream.pipeline);
 
-const configurationVersion = "1.0";
-const configurationFilename = "config.json";
-
 const addonConfigurationVersion = "1.0";
 const addonConfigurationFilename = "slipstream.json";
 
 const maxConcurrentDownloads = 3;
-
-interface ApplicationConfiguration {
-  version: string;
-}
 
 interface AddonConfiguration {
   version: string;
@@ -39,38 +32,12 @@ class AddonManger {
     curse: new CurseRepository()
   };
 
-  private configurationDirectory = "";
   private tempDirectory = "";
   private downloadQueue = new TaskQueue(maxConcurrentDownloads);
   private configurationUpdateQueue = new TaskQueue();
 
-  private configuration: ApplicationConfiguration = {
-    version: configurationVersion
-  };
-
-  async initialize(configurationDirectory: string, tempDirectory: string) {
-    this.configurationDirectory = configurationDirectory;
+  async initialize(tempDirectory: string) {
     this.tempDirectory = tempDirectory;
-
-    const configurationFile = path.join(
-      this.configurationDirectory,
-      configurationFilename
-    );
-
-    try {
-      await fs.promises.access(
-        configurationFile,
-        fs.constants.W_OK | fs.constants.R_OK
-      );
-
-      const fileBuffer = await fs.promises.readFile(configurationFile);
-      this.configuration = JSON.parse(fileBuffer.toString());
-    } catch (error) {
-      console.log(
-        `Configuration file does not exist or is inaccessible. Starting from an empty configuration. ${error}`
-      );
-      return;
-    }
   }
 
   async install(

@@ -2,7 +2,7 @@ import Vue from "vue";
 import { VuexModule, Module, Action, Mutation } from "vuex-class-modules";
 import addonManager from "@/addon/AddonManager";
 import { makeAddonStatus, default as AddonStatus } from "@/addon/AddonStatus";
-import { GameState } from "@/store/index";
+import { ApplicationState } from "@/store/index";
 import AddonDescription from "@/addon/AddonDescription";
 
 type AddonDescriptionMap = {
@@ -10,7 +10,7 @@ type AddonDescriptionMap = {
 };
 
 @Module
-export default class Addon extends VuexModule {
+export default class GameVersion extends VuexModule {
   gameVersion = "";
   installedAddons: AddonDescriptionMap = {};
   latestAddons: AddonDescriptionMap = {};
@@ -56,7 +56,7 @@ export default class Addon extends VuexModule {
     this.clear();
 
     const installedAddons = await addonManager.findInstalledAddons(
-      GameState.addonDirectoryForVersion(this.gameVersion)
+      ApplicationState.addonDirectoryForVersion(this.gameVersion)
     );
 
     for (const addon of installedAddons) {
@@ -107,7 +107,7 @@ export default class Addon extends VuexModule {
 
       await addonManager.install(
         addon,
-        GameState.addonDirectoryForVersion(this.gameVersion),
+        ApplicationState.addonDirectoryForVersion(this.gameVersion),
         (operation, percentage) => {
           if (
             percentage >= 100 ||

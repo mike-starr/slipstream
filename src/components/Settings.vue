@@ -33,7 +33,6 @@
                     v-show="false"
                     ref="wowDirectoryInput"
                     type="file"
-                    @change="wowDirectoryChanged"
                     webkitdirectory
                   />
                 </v-list-item-content>
@@ -86,33 +85,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { AddonStateMap } from "@/store/index";
-import Debounce from "@/util/Debounce";
+import { Component, Vue } from "vue-property-decorator";
 import { ipcRenderer } from "electron";
-import { GameState } from "@/store/index";
-
-// Turn this into the settings dialog.
-// only setting for now is the wow root directory.
+import { ApplicationState } from "@/store/index";
 
 const directorySelectReplyChannel = "wow-root-directory";
 
 @Component
 export default class AddonSearch extends Vue {
-  //AddonStateMap.get(this.gameVersion)?.search(this.searchTerm);
   dialog = false;
-  notifications = false;
-  sound = true;
-  widgets = false;
-  //$refs.wowDirectoryInput.click()
-  // use IPC to open the directory selector. input field is ugly.
-  wowDirectoryChanged(event: any) {
-    debugger;
-    console.log(`wow dir: ${JSON.stringify(this.$refs.wowDirectoryInput)}`);
-  }
 
   browseButtonClicked() {
-    console.log(`browse`);
     ipcRenderer.send(
       "open-directory-select-dialog",
       directorySelectReplyChannel
@@ -121,9 +104,7 @@ export default class AddonSearch extends Vue {
 
   created() {
     ipcRenderer.on(directorySelectReplyChannel, (event, directoryName) => {
-      console.log(`set dir: ${directoryName}`);
-      GameState.updateInstallationRoot(directoryName);
-      //GameState.setInstallationRoot(directoryName);
+      ApplicationState.updateRootGameDirectory(directoryName);
     });
   }
 }

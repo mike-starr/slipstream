@@ -5,8 +5,8 @@
         <v-subheader>VERSIONS</v-subheader>
         <v-list-item-group mandatory @change="onListChange">
           <v-list-item
-            v-for="(version, i) in versions"
-            :key="i"
+            v-for="version in versions"
+            :key="version"
             :value="version"
           >
             <!-- <v-list-item-avatar>
@@ -43,7 +43,7 @@ import AddonSearch from "./components/AddonSearch.vue";
 import AddonSearchResults from "./components/AddonSearchResults.vue";
 import Settings from "./components/Settings.vue";
 
-import { AddonStateMap, GameState, ApplicationState } from "@/store/index";
+import { GameVersionStateMap, ApplicationState } from "@/store/index";
 
 @Component({
   components: {
@@ -55,19 +55,17 @@ import { AddonStateMap, GameState, ApplicationState } from "@/store/index";
   }
 })
 export default class App extends Vue {
-  tabs = null;
-
   get versions() {
-    return GameState.gameDirectories.versions;
+    return ApplicationState.gameDirectories.versions;
   }
 
   get selectedVersion() {
-    return GameState.selectedVersion;
+    return ApplicationState.selectedVersion;
   }
 
   @Watch("versions")
   versionsChanged() {
-    for (const addonState of AddonStateMap.values()) {
+    for (const addonState of GameVersionStateMap.values()) {
       addonState.refresh();
     }
   }
@@ -77,13 +75,13 @@ export default class App extends Vue {
   }
 
   onListChange(value: string) {
-    GameState.selectVersion(value);
+    if (value) {
+      ApplicationState.selectVersion(value);
+    }
   }
 
   created() {
-    ApplicationState.initialize().then(() => {
-      GameState.updateInstallationRoot("/Users/mstarr/Documents/wow_root"); // get path from app config
-    });
+    ApplicationState.initialize();
   }
 }
 </script>

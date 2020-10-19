@@ -62,7 +62,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { AddonStateMap } from "@/store/index";
+import { GameVersionStateMap } from "@/store/index";
 import AddonDescription from "@/addon/AddonDescription";
 
 @Component
@@ -72,11 +72,11 @@ export default class AddonSearchResults extends Vue {
   @Prop({ type: String }) readonly gameVersion!: string;
 
   get searchResults() {
-    return AddonStateMap.get(this.gameVersion)?.searchResults;
+    return GameVersionStateMap.get(this.gameVersion)?.searchResults;
   }
 
   get statusMap() {
-    return AddonStateMap.get(this.gameVersion)?.addonStatus;
+    return GameVersionStateMap.get(this.gameVersion)?.addonStatus;
   }
 
   @Watch("searchResults")
@@ -85,7 +85,7 @@ export default class AddonSearchResults extends Vue {
   }
 
   installButtonClicked(searchResult: AddonDescription) {
-    AddonStateMap.get(this.gameVersion)?.install(searchResult);
+    GameVersionStateMap.get(this.gameVersion)?.install(searchResult);
   }
 }
 </script>

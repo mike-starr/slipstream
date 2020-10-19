@@ -88,7 +88,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { AddonStateMap } from "@/store/index";
+import { GameVersionStateMap } from "@/store/index";
 import AddonDescription from "@/addon/AddonDescription";
 
 @Component
@@ -99,22 +99,22 @@ export default class InstalledAddons extends Vue {
 
   get installedAddons() {
     return Object.values(
-      AddonStateMap.get(this.gameVersion)?.installedAddons || {}
+      GameVersionStateMap.get(this.gameVersion)?.installedAddons || {}
     );
   }
 
   get latestAddons() {
     return Object.values(
-      AddonStateMap.get(this.gameVersion)?.latestAddons || {}
+      GameVersionStateMap.get(this.gameVersion)?.latestAddons || {}
     );
   }
 
   get statusMap() {
-    return AddonStateMap.get(this.gameVersion)?.addonStatus;
+    return GameVersionStateMap.get(this.gameVersion)?.addonStatus;
   }
 
   updateAvailable(addon: AddonDescription): boolean {
-    const latestAddon = AddonStateMap.get(this.gameVersion)?.latestAddons[
+    const latestAddon = GameVersionStateMap.get(this.gameVersion)?.latestAddons[
       addon.slipstreamId
     ];
 
@@ -127,7 +127,7 @@ export default class InstalledAddons extends Vue {
   }
 
   updateButtonClicked(addon: AddonDescription) {
-    AddonStateMap.get(this.gameVersion)?.update(addon);
+    GameVersionStateMap.get(this.gameVersion)?.update(addon);
   }
 
   created() {

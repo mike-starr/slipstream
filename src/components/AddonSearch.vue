@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
-import { AddonStateMap } from "@/store/index";
+import { GameVersionStateMap } from "@/store/index";
 import Debounce from "@/util/Debounce";
 
 @Component
@@ -29,9 +29,9 @@ export default class AddonSearch extends Vue {
   @Watch("searchTerm")
   searchTermChanged() {
     if (this.searchTerm.length > 1) {
-      AddonStateMap.get(this.gameVersion)?.search(this.searchTerm);
+      GameVersionStateMap.get(this.gameVersion)?.search(this.searchTerm);
     } else {
-      AddonStateMap.get(this.gameVersion)?.setSearchResults([]);
+      GameVersionStateMap.get(this.gameVersion)?.setSearchResults([]);
     }
   }
 }

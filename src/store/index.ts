@@ -2,8 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import Application from "@/store/modules/Application";
-import Game from "@/store/modules/Game";
-import Addon from "@/store/modules/Addon";
+import GameVersion from "@/store/modules/GameVersion";
 
 Vue.use(Vuex);
 
@@ -20,23 +19,23 @@ export const ApplicationState = new Application({
   name: "Application"
 });
 
-export const GameState = new Game({
+/*export const GameState = new Game({
   store,
   name: "Game"
-});
+});*/
 
-export const AddonStateMap = new Map<string, Addon>();
+export const GameVersionStateMap = new Map<string, GameVersion>();
 
 export function updateAddonStates(versions: string[]) {
   for (const version of versions) {
-    if (!AddonStateMap.has(version)) {
-      const addonState = new Addon({
+    if (!GameVersionStateMap.has(version)) {
+      const addonState = new GameVersion({
         store,
         name: version
       });
 
       addonState.setVersion(version);
-      AddonStateMap.set(version, addonState);
+      GameVersionStateMap.set(version, addonState);
     }
   }
 }

@@ -1,20 +1,109 @@
-import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
-import addonManager from "@/addon/AddonManager";
 import { ipcRenderer } from "electron";
+import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
+import { updateAddonStates } from "@/store/index";
+import addonManager from "@/addon/AddonManager";
+import configurationManager from "@/config/ConfigurationManager";
+import fs from "fs";
+import path from "path";
+
+type GameDirectories = {
+  rootDirectory: string;
+  versions: string[];
+};
+
+async function verifyGameVersionDirectory(directory: string) {
+  try {
+    await fs.promises.access(
+      path.join(directory, "Interface", "Addons"),
+      fs.constants.W_OK | fs.constants.R_OK
+    );
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 @Module
 export default class Application extends VuexModule {
   userDataDirectory = "";
   tempDirectory = "";
+  gameDirectories: GameDirectories = {
+    rootDirectory: "",
+    versions: []
+  };
+  selectedVersion = "";
 
-  @Mutation
-  setUserDataDirectory(path: string) {
-    this.userDataDirectory = path;
+  addonDirectoryForVersion(version: string) {
+    return path.join(
+      this.gameDirectories.rootDirectory,
+      version,
+      "Interface",
+      "Addons"
+    );
   }
 
   @Mutation
-  setTempDirectory(path: string) {
-    this.tempDirectory = path;
+  setGameDirectories(directories: GameDirectories) {
+    this.gameDirectories = directories;
+  }
+
+  @Mutation
+  selectVersion(version: string) {
+    this.selectedVersion = version;
+  }
+
+  @Action
+  async updateRootGameDirectory(directory: string) {
+    if (this.gameDirectories.rootDirectory === directory) {
+      return;
+    }
+
+    let allSubDirectories: fs.Dirent[] = [];
+
+    try {
+      allSubDirectories = await fs.promises.readdir(directory, {
+        withFileTypes: true
+      });
+    } catch (error) {
+      console.warn(`Unable to read supplied root directory: ${directory}`);
+    }
+
+    const gameVersions = allSubDirectories
+      .filter(
+        (entry) =>
+          entry.isDirectory &&
+          entry.name.startsWith("_") &&
+          entry.name.endsWith("_")
+      )
+      .map((entry) => entry.name);
+
+    const verifiedGameVersions = [];
+
+    for (const gameVersion of gameVersions) {
+      if (await verifyGameVersionDirectory(path.join(directory, gameVersion))) {
+        verifiedGameVersions.push(gameVersion);
+      }
+    }
+
+    updateAddonStates(verifiedGameVersions);
+
+    this.setGameDirectories({
+      rootDirectory: directory,
+      versions: verifiedGameVersions
+    });
+
+    configurationManager.rootGameDirectory = directory;
+  }
+
+  @Mutation
+  setUserDataDirectory(directory: string) {
+    this.userDataDirectory = directory;
+  }
+
+  @Mutation
+  setTempDirectory(directory: string) {
+    this.tempDirectory = directory;
   }
 
   @Action
@@ -24,7 +113,9 @@ export default class Application extends VuexModule {
       this.setUserDataDirectory(directories.dataDirectory);
       this.setTempDirectory(directories.tempDirectory);
 
-      await addonManager.initialize(this.userDataDirectory, this.tempDirectory);
+      await addonManager.initialize(this.tempDirectory);
+      await configurationManager.initialize(this.userDataDirectory);
+      await this.updateRootGameDirectory(configurationManager.rootGameDirectory);
     } catch (error) {
       console.error(`Initialization failed: ${error}`);
     }
