@@ -24,6 +24,13 @@ async function verifyGameVersionDirectory(directory: string) {
   }
 }
 
+const versionOrder: { [key: string]: number } = {
+  _retail_: 0,
+  _classic_: 1,
+  _beta_: 2,
+  _ptr_: 3
+};
+
 @Module
 export default class Application extends VuexModule {
   userDataDirectory = "";
@@ -86,6 +93,16 @@ export default class Application extends VuexModule {
       }
     }
 
+    verifiedGameVersions.sort((a, b) => {
+      if (versionOrder[b] === undefined) {
+        return -1;
+      } else if (versionOrder[a] === undefined) {
+        return 1;
+      } else {
+        return versionOrder[a] - versionOrder[b];
+      }
+    });
+
     updateAddonStates(verifiedGameVersions);
 
     this.setGameDirectories({
@@ -115,7 +132,9 @@ export default class Application extends VuexModule {
 
       await addonManager.initialize(this.tempDirectory);
       await configurationManager.initialize(this.userDataDirectory);
-      await this.updateRootGameDirectory(configurationManager.rootGameDirectory);
+      await this.updateRootGameDirectory(
+        configurationManager.rootGameDirectory
+      );
     } catch (error) {
       console.error(`Initialization failed: ${error}`);
     }

@@ -1,25 +1,34 @@
 <template>
   <v-app>
-    <v-navigation-drawer app color="background" permanent width="200">
-      <v-list nav rounded>
-        <v-subheader>VERSIONS</v-subheader>
-        <v-list-item-group mandatory @change="onListChange">
-          <v-list-item
-            v-for="version in versions"
-            :key="version"
-            :value="version"
-          >
-            <!-- <v-list-item-avatar>
-              <v-img :src="item.avatar"></v-img>
-            </v-list-item-avatar> -->
-            <v-list-item-content>
-              <v-list-item-title v-html="version"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
+    <v-navigation-drawer app permanent width="100">
+      <v-tabs
+        v-model="tabs"
+        vertical
+        color="white"
+        @change="onListChange"
+        icons-and-text
+      >
+        <v-tab v-for="version in versions" :key="version">
+          {{ friendlyNameForVersion(version) }}
+          <v-icon>mdi-sword-cross</v-icon>
+        </v-tab>
+      </v-tabs>
+
       <v-divider />
       <Settings />
+
+      <!-- <v-container>
+        <v-row justify="center">
+          <v-card width="120" rounded="xl" color="transparent">
+            <v-row justify="center">
+              <v-card width="64" rounded="circle" color="white" flat>
+                <v-img contain :src="logo"></v-img></v-card
+            ></v-row>
+
+            <v-row justify="center"> Retail</v-row>
+          </v-card>
+        </v-row></v-container
+      > -->
     </v-navigation-drawer>
 
     <v-main>
@@ -44,6 +53,14 @@ import AddonSearchResults from "./components/AddonSearchResults.vue";
 import Settings from "./components/Settings.vue";
 
 import { GameVersionStateMap, ApplicationState } from "@/store/index";
+import logo from "@/assets/logo.png";
+
+const friendlyVersionNames: { [key: string]: string } = {
+  _retail_: "Retail",
+  _classic_: "Classic",
+  _beta_: "Beta",
+  _ptr_: "PTR"
+};
 
 @Component({
   components: {
@@ -55,6 +72,8 @@ import { GameVersionStateMap, ApplicationState } from "@/store/index";
   }
 })
 export default class App extends Vue {
+  tabs = null;
+
   get versions() {
     return ApplicationState.gameDirectories.versions;
   }
@@ -63,6 +82,10 @@ export default class App extends Vue {
     return ApplicationState.selectedVersion;
   }
 
+  // get real icons for game versions
+  get logo() {
+    return logo;
+  }
   @Watch("versions")
   versionsChanged() {
     for (const addonState of GameVersionStateMap.values()) {
@@ -70,17 +93,23 @@ export default class App extends Vue {
     }
   }
 
+  friendlyNameForVersion(version: string) {
+    return friendlyVersionNames[version]
+      ? friendlyVersionNames[version]
+      : version;
+  }
+
   isSelectedVersion(version: string) {
+    console.log(`test ${version} current ${this.selectedVersion}`);
     return version === this.selectedVersion;
   }
 
-  onListChange(value: string) {
-    if (value) {
-      ApplicationState.selectVersion(value);
-    }
+  onListChange(value: number) {
+    ApplicationState.selectVersion(this.versions[value]);
   }
 
   created() {
+    this.$vuetify.theme.dark = true;
     ApplicationState.initialize();
   }
 }
