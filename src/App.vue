@@ -2,13 +2,13 @@
   <v-app>
     <v-navigation-drawer app permanent width="100">
       <v-tabs
-        v-model="tabs"
+        v-model="tab"
+        @change="onListChange"
         vertical
         color="white"
-        @change="onListChange"
         icons-and-text
       >
-        <v-tab v-for="version in versions" :key="version">
+        <v-tab v-for="(version, i) in versions" :key="i">
           {{ friendlyNameForVersion(version) }}
           <v-icon>mdi-sword-cross</v-icon>
         </v-tab>
@@ -32,13 +32,8 @@
     </v-navigation-drawer>
 
     <v-main>
-      <div
-        style="height: 100%"
-        v-for="version in versions"
-        :key="version"
-        v-show="version === selectedVersion"
-      >
-        <AddonView :gameVersion="version" />
+      <div style="height: 100%">
+        <AddonView :gameVersion="selectedVersion" />
       </div>
     </v-main>
   </v-app>
@@ -72,7 +67,7 @@ const friendlyVersionNames: { [key: string]: string } = {
   }
 })
 export default class App extends Vue {
-  tabs = null;
+  tab = null;
 
   get versions() {
     return ApplicationState.gameDirectories.versions;
@@ -88,6 +83,8 @@ export default class App extends Vue {
   }
   @Watch("versions")
   versionsChanged() {
+    this.tab = null;
+
     for (const addonState of GameVersionStateMap.values()) {
       addonState.refresh();
     }
@@ -99,17 +96,11 @@ export default class App extends Vue {
       : version;
   }
 
-  isSelectedVersion(version: string) {
-    console.log(`test ${version} current ${this.selectedVersion}`);
-    return version === this.selectedVersion;
-  }
-
   onListChange(value: number) {
     ApplicationState.selectVersion(this.versions[value]);
   }
 
   created() {
-    this.$vuetify.theme.dark = true;
     ApplicationState.initialize();
   }
 }

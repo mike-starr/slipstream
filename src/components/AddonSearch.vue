@@ -25,13 +25,16 @@ export default class AddonSearch extends Vue {
 
   @Prop({ type: String }) readonly gameVersion!: string;
 
+  @Watch("gameVersion")
+  gameVersionChanged() {
+    this.searchTerm = "";
+  }
+
   @Debounce(500)
   @Watch("searchTerm")
   searchTermChanged() {
     if (this.searchTerm.length > 1) {
       GameVersionStateMap.get(this.gameVersion)?.search(this.searchTerm);
-    } else {
-      GameVersionStateMap.get(this.gameVersion)?.setSearchResults([]);
     }
   }
 }
