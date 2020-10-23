@@ -6,7 +6,7 @@
           v-model="dialog"
           fullscreen
           hide-overlay
-          transition="dialog-bottom-transition"
+          transition="fade-transition"
         >
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" v-bind="attrs" v-on="on">

@@ -1,7 +1,7 @@
 <template>
   <v-sheet height="100%" class="d-flex flex-column">
     <v-sheet>
-      <v-tabs v-model="tabs">
+      <v-tabs v-model="tabs" color="primary lighten-1">
         <v-tab>Installed Addons</v-tab>
         <v-tab>Search</v-tab>
       </v-tabs>

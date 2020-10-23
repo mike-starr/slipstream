@@ -1,37 +1,39 @@
 <template>
   <v-container fluid>
     <v-expansion-panels v-model="expansionPanel">
-      <v-expansion-panel
+      <v-expansion-panel class="secondary darken-1"
         v-for="installedAddon in installedAddons"
         :key="installedAddon.slipstreamId"
       >
         <v-expansion-panel-header>
-          <v-row align="center" justify="space-between" no-gutters>
-            <v-col cols="2">
-              <v-img
-                :src="installedAddon.thumbnailUrl"
-                class="grey lighten-2"
+          <v-row align="center" justify="start" no-gutters>
+            <v-col cols="9">
+              <v-avatar
+                style="border: 1px solid white;"
+                class="mr-2"
                 width="48"
                 height="48"
-                aspect-ratio="1"
+                left
+                rounded="lg"
               >
-                <template v-slot:placeholder>
-                  <v-row
-                    class="fill-height ma-0"
-                    align="center"
-                    justify="center"
-                  >
-                    <v-progress-circular
-                      indeterminate
-                      color="primary"
-                    ></v-progress-circular>
-                  </v-row>
-                </template>
-              </v-img>
+                <v-img :src="installedAddon.thumbnailUrl" class="transparent">
+                  <template v-slot:placeholder>
+                    <v-row
+                      class="fill-height ma-0"
+                      align="center"
+                      justify="center"
+                    >
+                      <v-progress-circular
+                        indeterminate
+                        color="primary"
+                      ></v-progress-circular>
+                    </v-row>
+                  </template>
+                </v-img>
+              </v-avatar>
+              {{ installedAddon.title }}
             </v-col>
-
-            <v-col cols="4">{{ installedAddon.title }} </v-col>
-            <v-col cols="2">{{
+            <!--<v-col cols="2">{{
               statusMap[installedAddon.slipstreamId].progress
                 ? statusMap[installedAddon.slipstreamId].progress.operation +
                   " " +
@@ -39,16 +41,17 @@
                     100 +
                   "%"
                 : statusMap[installedAddon.slipstreamId].state
-            }}</v-col>
+            }}</v-col> -->
             <!-- figure out when to display update button -->
-            <v-col cols="4"
+            <v-col cols="3"
               ><v-btn
                 v-if="updateAvailable(installedAddon)"
-                color="primary"
+                color="primary darken-1"
                 @click.stop="updateButtonClicked(installedAddon)"
                 >Update</v-btn
               ></v-col
             >
+            <v-spacer></v-spacer>
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
