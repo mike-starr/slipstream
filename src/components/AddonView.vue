@@ -2,8 +2,10 @@
   <v-sheet height="100%" class="d-flex flex-column">
     <v-sheet>
       <v-tabs v-model="tabs" color="primary lighten-1">
-        <v-tab>Installed Addons</v-tab>
-        <v-tab>Search</v-tab>
+        <v-tab
+          ><v-icon left>mdi-format-list-bulleted</v-icon>Installed Addons</v-tab
+        >
+        <v-tab><v-icon left>mdi-magnify</v-icon>Search</v-tab>
       </v-tabs>
       <AddonSearch :gameVersion="gameVersion" v-show="tabs === 1"></AddonSearch>
       <v-divider></v-divider>

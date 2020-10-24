@@ -1,7 +1,8 @@
 <template>
   <v-container fluid>
     <v-expansion-panels v-model="expansionPanel">
-      <v-expansion-panel class="secondary darken-1"
+      <v-expansion-panel
+        class="secondary darken-1"
         v-for="installedAddon in installedAddons"
         :key="installedAddon.slipstreamId"
       >
@@ -14,7 +15,7 @@
                 width="48"
                 height="48"
                 left
-                rounded="lg"
+                rounded="circle"
               >
                 <v-img :src="installedAddon.thumbnailUrl" class="transparent">
                   <template v-slot:placeholder>
@@ -46,12 +47,11 @@
             <v-col cols="3"
               ><v-btn
                 v-if="updateAvailable(installedAddon)"
-                color="primary darken-1"
+                color="primary"
                 @click.stop="updateButtonClicked(installedAddon)"
                 >Update</v-btn
               ></v-col
             >
-            <v-spacer></v-spacer>
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>

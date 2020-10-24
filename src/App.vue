@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer app permanent width="100">
+    <v-navigation-drawer app permanent color="#1D1D1D" width="100">
       <v-tabs
         v-model="tab"
         @change="onListChange"

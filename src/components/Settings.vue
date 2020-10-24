@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <v-row align="center">
-      <v-col rows="12" justify="center">
+    <v-row align="start" justify="center">
+      <v-col>
         <v-dialog
           v-model="dialog"
           fullscreen
@@ -9,9 +9,17 @@
           transition="fade-transition"
         >
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="primary" v-bind="attrs" v-on="on">
-              Settings
-            </v-btn>
+            <div class="text-center">
+              <v-btn
+                color="primary lighten-1"
+                outlined
+                fab
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>mdi-cog</v-icon>
+              </v-btn>
+            </div>
           </template>
           <v-card>
             <v-toolbar color="background">
