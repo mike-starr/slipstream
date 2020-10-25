@@ -3,8 +3,8 @@
     <v-expansion-panels v-model="expansionPanel">
       <v-expansion-panel
         class="secondary darken-1"
-        v-for="installedAddon in installedAddons"
-        :key="installedAddon.slipstreamId"
+        v-for="addon in addons"
+        :key="addon.slipstreamId"
       >
         <v-expansion-panel-header>
           <v-row align="center" justify="start" no-gutters>
@@ -17,7 +17,7 @@
                 left
                 rounded="circle"
               >
-                <v-img :src="installedAddon.thumbnailUrl" class="transparent">
+                <v-img :src="addon.thumbnailUrl" class="transparent">
                   <template v-slot:placeholder>
                     <v-row
                       class="fill-height ma-0"
@@ -32,30 +32,38 @@
                   </template>
                 </v-img>
               </v-avatar>
-              {{ installedAddon.title }}
+              {{ addon.title }}
             </v-col>
             <!--<v-col cols="2">{{
-              statusMap[installedAddon.slipstreamId].progress
-                ? statusMap[installedAddon.slipstreamId].progress.operation +
+              statusMap[addon.slipstreamId].progress
+                ? statusMap[addon.slipstreamId].progress.operation +
                   " " +
-                  statusMap[installedAddon.slipstreamId].progress.percentage *
+                  statusMap[addon.slipstreamId].progress.percentage *
                     100 +
                   "%"
-                : statusMap[installedAddon.slipstreamId].state
+                : statusMap[addon.slipstreamId].state
             }}</v-col> -->
-            <!-- figure out when to display update button -->
             <v-col cols="3"
               ><v-btn
-                v-if="updateAvailable(installedAddon)"
+                v-if="
+                  statusMap[addon.slipstreamId].state === 'Installed' &&
+                    updateAvailable(addon)
+                "
                 color="primary"
-                @click.stop="updateButtonClicked(installedAddon)"
+                @click.stop="updateButtonClicked(addon)"
                 >Update</v-btn
+              >
+              <v-btn
+                v-if="statusMap[addon.slipstreamId].state === 'NotInstalled'"
+                color="primary"
+                @click.stop="installButtonClicked(addon)"
+                >Install</v-btn
               ></v-col
             >
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          {{ installedAddon.summary }}
+          {{ addon.summary }}
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -68,16 +76,11 @@ import { GameVersionStateMap } from "@/store/index";
 import AddonDescription from "@/addon/AddonDescription";
 
 @Component
-export default class InstalledAddons extends Vue {
+export default class AddonList extends Vue {
   expansionPanel: number | undefined = 0;
 
   @Prop({ type: String }) readonly gameVersion!: string;
-
-  get installedAddons() {
-    return Object.values(
-      GameVersionStateMap.get(this.gameVersion)?.installedAddons || {}
-    );
-  }
+  @Prop({ type: Array }) readonly addons!: string;
 
   get latestAddons() {
     return Object.values(
@@ -97,8 +100,8 @@ export default class InstalledAddons extends Vue {
     return latestAddon ? latestAddon.fileDate !== addon.fileDate : false;
   }
 
-  @Watch("installedAddons")
-  onInstalledAddonsChanged() {
+  @Watch("addons")
+  onAddonsChanged() {
     this.expansionPanel = undefined;
   }
 
@@ -106,8 +109,8 @@ export default class InstalledAddons extends Vue {
     GameVersionStateMap.get(this.gameVersion)?.update(addon);
   }
 
-  created() {
-    //AddonStateMap.get(this.gameVersion)?.refresh();
+  installButtonClicked(searchResult: AddonDescription) {
+    GameVersionStateMap.get(this.gameVersion)?.install(searchResult);
   }
 }
 </script>

@@ -41,10 +41,8 @@
 
 <script lang="ts">
 import { Component, Watch, Vue } from "vue-property-decorator";
-import InstalledAddons from "./components/InstalledAddons.vue";
 import AddonView from "./components/AddonView.vue";
 import AddonSearch from "./components/AddonSearch.vue";
-import AddonSearchResults from "./components/AddonSearchResults.vue";
 import Settings from "./components/Settings.vue";
 
 import { GameVersionStateMap, ApplicationState } from "@/store/index";
@@ -60,9 +58,7 @@ const friendlyVersionNames: { [key: string]: string } = {
 @Component({
   components: {
     AddonView,
-    InstalledAddons,
     AddonSearch,
-    AddonSearchResults,
     Settings
   }
 })

@@ -12,8 +12,8 @@
             <div class="text-center">
               <v-btn
                 color="primary lighten-1"
-                outlined
                 fab
+                outlined
                 v-bind="attrs"
                 v-on="on"
               >

@@ -14,10 +14,10 @@
     <v-sheet style="flex: 1 0 0; overflow-y:auto">
       <v-tabs-items v-model="tabs">
         <v-tab-item reverse-transition="false" transition="false">
-          <InstalledAddons :gameVersion="gameVersion" />
+          <AddonList :gameVersion="gameVersion" :addons="installedAddons" />
         </v-tab-item>
-        <v-tab-item reverse-transition="false" transition="false"
-          ><AddonSearchResults :gameVersion="gameVersion" />
+        <v-tab-item reverse-transition="false" transition="false">
+          <AddonList :gameVersion="gameVersion" :addons="searchResults" />
         </v-tab-item>
       </v-tabs-items>
     </v-sheet>
@@ -26,16 +26,26 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import InstalledAddons from "./InstalledAddons.vue";
+import AddonList from "./AddonList.vue";
 import AddonSearch from "./AddonSearch.vue";
-import AddonSearchResults from "./AddonSearchResults.vue";
+import { GameVersionStateMap } from "@/store/index";
 
 @Component({
-  components: { InstalledAddons, AddonSearch, AddonSearchResults }
+  components: { AddonList, AddonSearch }
 })
 export default class App extends Vue {
   tabs = null;
 
   @Prop({ type: String }) readonly gameVersion!: string;
+
+  get installedAddons() {
+    return Object.values(
+      GameVersionStateMap.get(this.gameVersion)?.installedAddons || {}
+    );
+  }
+
+  get searchResults() {
+    return GameVersionStateMap.get(this.gameVersion)?.searchResults;
+  }
 }
 </script>
