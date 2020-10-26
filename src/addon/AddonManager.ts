@@ -55,7 +55,7 @@ class AddonManger {
     );
     const extractionDirectory = `${localPath}_extracted`;
 
-    progress("Downloading", 0);
+    progress("Downloading", 0.05);
 
     await this.downloadQueue.enqueue(() => {
       return this.downloadFile(addon.fileUrl, localPath, (pct) => {
@@ -63,11 +63,11 @@ class AddonManger {
       });
     });
 
-    progress("Unzipping", 0.8);
+    progress("Extracting", 0.8);
 
     await unzipToDirectory(localPath, extractionDirectory, true);
 
-    progress("Finalizing", 0.95);
+    progress("Finalizing", 0.98);
 
     await this.validateAndMove(
       extractionDirectory,

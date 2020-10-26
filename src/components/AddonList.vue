@@ -34,32 +34,49 @@
               </v-avatar>
               {{ addon.title }}
             </v-col>
-            <!--<v-col cols="2">{{
-              statusMap[addon.slipstreamId].progress
-                ? statusMap[addon.slipstreamId].progress.operation +
-                  " " +
-                  statusMap[addon.slipstreamId].progress.percentage *
-                    100 +
-                  "%"
-                : statusMap[addon.slipstreamId].state
-            }}</v-col> -->
             <v-col cols="3"
-              ><v-btn
-                v-if="
-                  statusMap[addon.slipstreamId].state === 'Installed' &&
-                    updateAvailable(addon)
-                "
-                color="primary"
-                @click.stop="updateButtonClicked(addon)"
-                >Update</v-btn
-              >
-              <v-btn
-                v-if="statusMap[addon.slipstreamId].state === 'NotInstalled'"
-                color="primary"
-                @click.stop="installButtonClicked(addon)"
-                >Install</v-btn
-              ></v-col
-            >
+              ><div class="text-center">
+                <v-btn
+                  v-if="
+                    statusMap[addon.slipstreamId].state === 'Installed' &&
+                      updateAvailable(addon.slipstreamId)
+                  "
+                  color="primary lighten-1"
+                  fab
+                  outlined
+                  small
+                  @click.stop="updateButtonClicked(addon)"
+                >
+                  <v-icon>mdi-sync</v-icon>
+                </v-btn>
+                <v-btn
+                  v-if="statusMap[addon.slipstreamId].state === 'NotInstalled'"
+                  color="primary lighten-1"
+                  fab
+                  outlined
+                  small
+                  @click.stop="installButtonClicked(addon)"
+                  ><v-icon>mdi-download</v-icon></v-btn
+                >
+                <v-progress-circular
+                  v-if="statusMap[addon.slipstreamId].state === 'Installing'"
+                  color="primary lighten-1"
+                  height="36"
+                  :value="
+                    statusMap[addon.slipstreamId].progress.percentage * 100
+                  "
+                >
+                </v-progress-circular>
+                <v-icon
+                  v-if="
+                    statusMap[addon.slipstreamId].state === 'Installed' &&
+                      !updateAvailable(addon.slipstreamId)
+                  "
+                  color="green darken-1"
+                  >mdi-check-bold</v-icon
+                >
+              </div>
+            </v-col>
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
@@ -92,12 +109,17 @@ export default class AddonList extends Vue {
     return GameVersionStateMap.get(this.gameVersion)?.addonStatus;
   }
 
-  updateAvailable(addon: AddonDescription): boolean {
+  updateAvailable(slipstreamId: string): boolean {
     const latestAddon = GameVersionStateMap.get(this.gameVersion)?.latestAddons[
-      addon.slipstreamId
+      slipstreamId
     ];
 
-    return latestAddon ? latestAddon.fileDate !== addon.fileDate : false;
+    const installedAddon = GameVersionStateMap.get(this.gameVersion)
+      ?.installedAddons[slipstreamId];
+
+    return latestAddon && installedAddon
+      ? latestAddon.fileDate !== installedAddon.fileDate
+      : false;
   }
 
   @Watch("addons")

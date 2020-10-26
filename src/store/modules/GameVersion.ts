@@ -110,6 +110,8 @@ export default class GameVersion extends VuexModule {
         ApplicationState.addonDirectoryForVersion(this.gameVersion),
         (operation, percentage) => {
           if (
+            operation !==
+              this.addonStatus[addon.slipstreamId]?.progress?.operation ||
             percentage >= 100 ||
             percentage -
               (this.addonStatus[addon.slipstreamId]?.progress?.percentage ||

@@ -7,7 +7,7 @@ export type AddonInstallState =
 export type AddonInstallOperation =
   | "Initializing"
   | "Downloading"
-  | "Unzipping"
+  | "Extracting"
   | "Finalizing";
 
 export default interface AddonStatus {
@@ -26,7 +26,7 @@ export function makeAddonStatus(
   return {
     state: state,
     progress:
-      progressPercentage && progressOperation
+      progressPercentage !== undefined && progressOperation !== undefined
         ? {
             percentage: progressPercentage,
             operation: progressOperation
