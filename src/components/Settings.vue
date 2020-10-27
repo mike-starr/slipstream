@@ -1,14 +1,14 @@
 <template>
-  <v-container>
-    <v-row align="start" justify="center">
-      <v-col>
-        <v-dialog
-          v-model="dialog"
-          fullscreen
-          hide-overlay
-          transition="fade-transition"
-        >
-          <template v-slot:activator="{ on, attrs }">
+  <v-dialog
+    v-model="dialog"
+    fullscreen
+    hide-overlay
+    transition="fade-transition"
+  >
+    <template v-slot:activator="{ on, attrs }">
+      <v-container>
+        <v-row align="start" justify="center">
+          <v-col>
             <div class="text-center">
               <v-btn
                 color="primary lighten-1"
@@ -20,76 +20,50 @@
                 <v-icon>mdi-cog</v-icon>
               </v-btn>
             </div>
-          </template>
-          <v-card>
-            <v-toolbar color="background">
-              <v-toolbar-title>Settings</v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-toolbar-items>
-                <v-btn icon @click="dialog = false">
-                  <v-icon>mdi-close</v-icon>
-                </v-btn>
-              </v-toolbar-items>
-            </v-toolbar>
-            <v-list subheader>
-              <!--<v-subheader>User Controls</v-subheader>-->
-              <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-title>World of Warcraft Path</v-list-item-title>
-                  <v-btn @click="browseButtonClicked()">Browse</v-btn>
-                  <input
-                    v-show="false"
-                    ref="wowDirectoryInput"
-                    type="file"
-                    webkitdirectory
-                  />
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-            <v-divider></v-divider>
-            <!--<v-list three-line subheader>
-              <v-subheader>General</v-subheader>
-              <v-list-item>
-                <v-list-item-action>
-                  <v-checkbox v-model="notifications"></v-checkbox>
-                </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>Notifications</v-list-item-title>
-                  <v-list-item-subtitle
-                    >Notify me about updates to apps or games that I
-                    downloaded</v-list-item-subtitle
-                  >
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-action>
-                  <v-checkbox v-model="sound"></v-checkbox>
-                </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>Sound</v-list-item-title>
-                  <v-list-item-subtitle
-                    >Auto-update apps at any time. Data charges may
-                    apply</v-list-item-subtitle
-                  >
-                </v-list-item-content>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-action>
-                  <v-checkbox v-model="widgets"></v-checkbox>
-                </v-list-item-action>
-                <v-list-item-content>
-                  <v-list-item-title>Auto-add widgets</v-list-item-title>
-                  <v-list-item-subtitle
-                    >Automatically add home screen widgets</v-list-item-subtitle
-                  >
-                </v-list-item-content>
-              </v-list-item>
-            </v-list> -->
-          </v-card>
-        </v-dialog>
-      </v-col>
-    </v-row>
-  </v-container>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+    <v-card>
+      <v-toolbar color="secondary darken-1">
+        <v-toolbar-title>Settings</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn icon @click="dialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-container fluid>
+        <v-row no-gutters justify="start">
+          <v-col cols="11"
+            ><div class="text-subtitle-1 ml-1">
+              World of Warcraft Directory
+            </div></v-col
+          >
+        </v-row>
+        <v-row no-gutters justify="start">
+          <v-col cols="11">
+            <v-text-field
+              readonly
+              solo
+              background-color="secondary darken-1"
+              label="World of Warcraft Directory"
+              type="text"
+              color="white"
+              :value="rootDirectory()"
+            >
+              <template v-slot:append>
+                <v-icon color="primary lighten-1" @click="browseButtonClicked()"
+                  >mdi-folder-edit</v-icon
+                >
+              </template>
+            </v-text-field>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
@@ -102,6 +76,10 @@ const directorySelectReplyChannel = "wow-root-directory";
 @Component
 export default class AddonSearch extends Vue {
   dialog = false;
+
+  rootDirectory() {
+    return ApplicationState.gameDirectories.rootDirectory;
+  }
 
   browseButtonClicked() {
     ipcRenderer.send(
