@@ -11,7 +11,7 @@
             <v-col cols="9">
               <v-avatar
                 style="border: 1px solid white;"
-                class="mr-2"
+                class="mr-4"
                 width="48"
                 height="48"
                 left
@@ -32,7 +32,7 @@
                   </template>
                 </v-img>
               </v-avatar>
-              {{ addon.title }}
+              <span class="font-weight-medium">{{ addon.title }}</span>
             </v-col>
             <v-col cols="3"
               ><div class="text-center">
@@ -80,7 +80,76 @@
           </v-row>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          {{ addon.summary }}
+          <v-container fluid>
+            <v-row justify="start">
+              <v-col cols="6">
+                <v-card
+                  color="secondary darken-1"
+                  flat
+                  height="100%"
+                  class="d-flex flex-column text-body-2"
+                >
+                  <div class="ma-4">{{ addon.summary }}</div>
+                  <v-spacer></v-spacer>
+                  <v-card-actions>
+                    <v-btn fab outlined small color="primary lighten-1">
+                      <v-icon>mdi-open-in-new</v-icon>
+                    </v-btn>
+                    <v-btn
+                      v-if="
+                        statusMap[addon.slipstreamId].state !== 'NotInstalled'
+                      "
+                      class="ml-3"
+                      :disabled="
+                        !(statusMap[addon.slipstreamId].state === 'Installed')
+                      "
+                      fab
+                      outlined
+                      small
+                      color="error"
+                    >
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+              <v-spacer></v-spacer>
+              <v-col cols="5">
+                <v-list>
+                  <v-list-item dense two-line>
+                    <v-list-item-content>
+                      <v-list-item-title class="font-weight-bold"
+                        >Author</v-list-item-title
+                      >
+                      <v-list-item-subtitle>someone</v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item dense two-line>
+                    <v-list-item-content>
+                      <v-list-item-title>Installed Version</v-list-item-title>
+                      <v-list-item-subtitle
+                        >DetailsClassic.1.13.5.214.142.zip</v-list-item-subtitle
+                      >
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item dense two-line>
+                    <v-list-item-content>
+                      <v-list-item-title>Latest Version</v-list-item-title>
+                      <v-list-item-subtitle
+                        >DetailsClassic.1.14.5.214.900.zip</v-list-item-subtitle
+                      >
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item dense two-line>
+                    <v-list-item-content>
+                      <v-list-item-title>Game Version</v-list-item-title>
+                      <v-list-item-subtitle>9.0.1</v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -122,8 +191,8 @@ export default class AddonList extends Vue {
       : false;
   }
 
-  @Watch("addons")
-  onAddonsChanged() {
+  @Watch("gameVersion")
+  onGameVersionChanged() {
     this.expansionPanel = undefined;
   }
 
