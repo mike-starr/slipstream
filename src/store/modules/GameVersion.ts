@@ -92,6 +92,9 @@ export default class GameVersion extends VuexModule {
           status: makeAddonStatus("NotInstalled")
         });
       }
+
+      // Update the latest set whenever search results are returned.
+      this.setLatestAddon(result);
     }
 
     this.setSearchResults(searchResults);
