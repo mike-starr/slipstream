@@ -83,67 +83,78 @@
           <v-container fluid>
             <v-row justify="start">
               <v-col cols="6">
-                <v-card
-                  color="secondary darken-1"
-                  flat
-                  height="100%"
-                  class="d-flex flex-column text-body-2"
-                >
-                  <div class="ma-4">{{ addon.summary }}</div>
-                  <v-spacer></v-spacer>
-                  <v-card-actions>
-                    <v-btn fab outlined small color="primary lighten-1">
-                      <v-icon>mdi-open-in-new</v-icon>
-                    </v-btn>
-                    <v-btn
-                      v-if="
-                        statusMap[addon.slipstreamId].state !== 'NotInstalled'
-                      "
-                      class="ml-3"
-                      :disabled="
-                        !(statusMap[addon.slipstreamId].state === 'Installed')
-                      "
-                      fab
-                      outlined
-                      small
-                      color="error"
-                    >
-                      <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-              <v-spacer></v-spacer>
-              <v-col cols="5">
-                <v-list>
+                <v-list height="100%">
+                  <v-list-item dense two-line>
+                    <v-list-item-content>
+                      <v-list-item-title>Summary</v-list-item-title>
+                      <v-list-item-subtitle class="wrap-text">{{
+                        addon.summary
+                      }}</v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
                   <v-list-item dense two-line>
                     <v-list-item-content>
                       <v-list-item-title class="font-weight-bold"
                         >Author</v-list-item-title
                       >
-                      <v-list-item-subtitle>someone</v-list-item-subtitle>
+                      <v-list-item-subtitle>{{
+                        addon.author
+                      }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
-                  <v-list-item dense two-line>
+                </v-list>
+              </v-col>
+              <v-spacer></v-spacer>
+              <v-col cols="6">
+                <v-list height="100%">
+                  <v-list-item
+                    dense
+                    two-line
+                    v-if="installedAddonMap[addon.slipstreamId] !== undefined"
+                  >
                     <v-list-item-content>
-                      <v-list-item-title>Installed Version</v-list-item-title>
-                      <v-list-item-subtitle
-                        >DetailsClassic.1.13.5.214.142.zip</v-list-item-subtitle
+                      <v-list-item-title
+                        >Installed Version
+                        <v-btn
+                          v-if="
+                            statusMap[addon.slipstreamId].state !==
+                              'NotInstalled'
+                          "
+                          :disabled="
+                            !(
+                              statusMap[addon.slipstreamId].state ===
+                              'Installed'
+                            )
+                          "
+                          class="pb-1"
+                          icon
+                          x-small
+                          color="error"
+                        >
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn></v-list-item-title
                       >
+                      <v-list-item-subtitle>{{
+                        installedAddonMap[addon.slipstreamId].displayVersion
+                      }}</v-list-item-subtitle>
+                      <v-list-item-subtitle>{{
+                        installedAddonMap[addon.slipstreamId].gameVersion
+                      }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
-                  <v-list-item dense two-line>
+                  <v-list-item
+                    dense
+                    two-line
+                    v-if="latestAddonMap[addon.slipstreamId] !== undefined"
+                  >
                     <v-list-item-content>
                       <v-list-item-title>Latest Version</v-list-item-title>
-                      <v-list-item-subtitle
-                        >DetailsClassic.1.14.5.214.900.zip</v-list-item-subtitle
-                      >
-                    </v-list-item-content>
-                  </v-list-item>
-                  <v-list-item dense two-line>
-                    <v-list-item-content>
-                      <v-list-item-title>Game Version</v-list-item-title>
-                      <v-list-item-subtitle>9.0.1</v-list-item-subtitle>
+                      <v-list-item-subtitle>{{
+                        latestAddonMap[addon.slipstreamId].displayVersion
+                      }}</v-list-item-subtitle>
+                      <v-list-item-subtitle>{{
+                        latestAddonMap[addon.slipstreamId].gameVersion
+                      }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list>
@@ -155,6 +166,12 @@
     </v-expansion-panels>
   </v-container>
 </template>
+
+<style scoped>
+.v-list-item__subtitle {
+  white-space: normal;
+}
+</style>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
@@ -168,10 +185,12 @@ export default class AddonList extends Vue {
   @Prop({ type: String }) readonly gameVersion!: string;
   @Prop({ type: Array }) readonly addons!: string;
 
-  get latestAddons() {
-    return Object.values(
-      GameVersionStateMap.get(this.gameVersion)?.latestAddons || {}
-    );
+  get latestAddonMap() {
+    return GameVersionStateMap.get(this.gameVersion)?.latestAddons || {};
+  }
+
+  get installedAddonMap() {
+    return GameVersionStateMap.get(this.gameVersion)?.installedAddons || {};
   }
 
   get statusMap() {
@@ -179,12 +198,8 @@ export default class AddonList extends Vue {
   }
 
   updateAvailable(slipstreamId: string): boolean {
-    const latestAddon = GameVersionStateMap.get(this.gameVersion)?.latestAddons[
-      slipstreamId
-    ];
-
-    const installedAddon = GameVersionStateMap.get(this.gameVersion)
-      ?.installedAddons[slipstreamId];
+    const latestAddon = this.latestAddonMap[slipstreamId];
+    const installedAddon = this.installedAddonMap[slipstreamId];
 
     return latestAddon && installedAddon
       ? latestAddon.fileDate !== installedAddon.fileDate

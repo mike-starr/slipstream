@@ -51,7 +51,7 @@ class AddonManger {
 
     const localPath = path.join(
       this.tempDirectory,
-      `${addon.id}-${Date.now()}.zip`
+      `${addon.repositoryId}-${Date.now()}.zip`
     );
     const extractionDirectory = `${localPath}_extracted`;
 
@@ -127,10 +127,16 @@ class AddonManger {
       );
     }
 
-    return this.repositories["curse"].addonDescriptionsForIds(
-      addons.map((addon) => addon.id),
-      addons[0].gameFlavor
-    );
+    try {
+      const latestAddons = await this.repositories["curse"].addonDescriptionsForIds(
+        addons.map((addon) => addon.repositoryId),
+        addons[0].gameFlavor
+      );
+      return latestAddons;
+    } catch (error) {
+      console.warn(`Failed to retrieve latest addon versions: ${error}`);
+      return [];
+    }
   }
 
   private flavorForGameVersion(gameVersion: string): GameFlavor {
@@ -163,7 +169,7 @@ class AddonManger {
     const addonIndex = addonConfig.installedAddons.findIndex(
       (installedAddon) => {
         return (
-          installedAddon.id === addon.id &&
+          installedAddon.repositoryId === addon.repositoryId &&
           installedAddon.repository === addon.repository
         );
       }

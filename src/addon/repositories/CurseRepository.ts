@@ -38,16 +38,37 @@ export default class CurseRepository implements AddonRepository {
           ) || addon.categories[0]
         ).avatarUrl;
 
+        let gameVersion = "unknown";
+
+        if (
+          Array.isArray(addon.gameVersionLatestFiles) &&
+          addon.gameVersionLatestFiles.length > 0
+        ) {
+          const versionEntry = addon.gameVersionLatestFiles.find(
+            (item: any) => item.projectFileName === latestFile.fileName
+          );
+
+          if (versionEntry) {
+            gameVersion = versionEntry.gameVersion;
+          } else {
+            gameVersion = addon.gameVersionLatestFiles[0].gameVersion;
+          }
+        }
+
         descriptions.push(
           makeAddonDescription(
             addon.id,
             "curse",
+            addon.authors?.[0]?.name || "unknown",
             gameFlavor,
             addon.name,
             addon.summary,
             latestFile.downloadUrl,
             latestFile.fileDate,
+            latestFile.fileName,
+            gameVersion,
             thumbnailUrl,
+            addon.websiteUrl,
             latestFile.modules.map((module: any) => module.foldername)
           )
         );
