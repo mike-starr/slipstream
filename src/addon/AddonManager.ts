@@ -55,8 +55,6 @@ class AddonManger {
     );
     const extractionDirectory = `${localPath}_extracted`;
 
-    progress("Downloading", 0.05);
-
     await this.downloadQueue.enqueue(() => {
       return this.downloadFile(addon.fileUrl, localPath, (pct) => {
         progress("Downloading", pct * 0.8);
@@ -76,7 +74,7 @@ class AddonManger {
     );
 
     await this.configurationUpdateQueue.enqueue(() => {
-      return this.updateConfiguration(addon, directory);
+      return this.updateConfigurationForAddon(addon, directory);
     });
 
     progress("Finalizing", 1.0);
@@ -128,7 +126,9 @@ class AddonManger {
     }
 
     try {
-      const latestAddons = await this.repositories["curse"].addonDescriptionsForIds(
+      const latestAddons = await this.repositories[
+        "curse"
+      ].addonDescriptionsForIds(
         addons.map((addon) => addon.repositoryId),
         addons[0].gameFlavor
       );
@@ -137,6 +137,21 @@ class AddonManger {
       console.warn(`Failed to retrieve latest addon versions: ${error}`);
       return [];
     }
+  }
+
+  async delete(addon: AddonDescription, directory: string) {
+    await this.configurationUpdateQueue.enqueue(() => {
+      return this.removeAddonFromConfiguration(addon, directory);
+    });
+
+    await Promise.all(
+      addon.directories.map((addonDirectory) => {
+        return fs.promises.rmdir(path.join(directory, addonDirectory), {
+          recursive: true,
+          maxRetries: 3
+        });
+      })
+    );
   }
 
   private flavorForGameVersion(gameVersion: string): GameFlavor {
@@ -160,7 +175,7 @@ class AddonManger {
     );
   }
 
-  private async updateConfiguration(
+  private async updateConfigurationForAddon(
     addon: AddonDescription,
     directory: string
   ) {
@@ -180,6 +195,26 @@ class AddonManger {
     } else {
       addonConfig.installedAddons.push(addon);
     }
+
+    await this.writeAddonConfiguration(addonConfig, directory);
+  }
+
+  private async removeAddonFromConfiguration(
+    addon: AddonDescription,
+    directory: string
+  ) {
+    const addonConfig = await this.readAddonConfiguration(directory);
+
+    const addonIndex = addonConfig.installedAddons.findIndex(
+      (installedAddon) => {
+        return (
+          installedAddon.repositoryId === addon.repositoryId &&
+          installedAddon.repository === addon.repository
+        );
+      }
+    );
+
+    addonConfig.installedAddons.splice(addonIndex, 1);
 
     await this.writeAddonConfiguration(addonConfig, directory);
   }

@@ -62,6 +62,10 @@
                   v-if="statusMap[addon.slipstreamId].state === 'Installing'"
                   color="primary lighten-1"
                   height="36"
+                  :indeterminate="
+                    statusMap[addon.slipstreamId].progress.operation ===
+                      'Initializing'
+                  "
                   :value="
                     statusMap[addon.slipstreamId].progress.percentage * 100
                   "
@@ -130,6 +134,7 @@
                           icon
                           x-small
                           color="error"
+                          @click.stop="deleteButtonClicked(addon)"
                         >
                           <v-icon>mdi-delete</v-icon>
                         </v-btn></v-list-item-title
@@ -137,9 +142,11 @@
                       <v-list-item-subtitle>{{
                         installedAddonMap[addon.slipstreamId].displayVersion
                       }}</v-list-item-subtitle>
-                      <v-list-item-subtitle>{{
-                        installedAddonMap[addon.slipstreamId].gameVersion
-                      }}</v-list-item-subtitle>
+                      <v-list-item-subtitle>
+                        {{
+                          installedAddonMap[addon.slipstreamId].gameVersion
+                        }}</v-list-item-subtitle
+                      >
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item
@@ -152,9 +159,11 @@
                       <v-list-item-subtitle>{{
                         latestAddonMap[addon.slipstreamId].displayVersion
                       }}</v-list-item-subtitle>
-                      <v-list-item-subtitle>{{
-                        latestAddonMap[addon.slipstreamId].gameVersion
-                      }}</v-list-item-subtitle>
+                      <v-list-item-subtitle>
+                        {{
+                          latestAddonMap[addon.slipstreamId].gameVersion
+                        }}</v-list-item-subtitle
+                      >
                     </v-list-item-content>
                   </v-list-item>
                 </v-list>
@@ -170,6 +179,15 @@
 <style scoped>
 .v-list-item__subtitle {
   white-space: normal;
+}
+</style>
+
+<style>
+.v-progress-circular__overlay {
+  transition: none !important;
+}
+.v-progress-circular__underlay {
+  stroke: #1d1d1d !important;
 }
 </style>
 
@@ -215,8 +233,12 @@ export default class AddonList extends Vue {
     GameVersionStateMap.get(this.gameVersion)?.update(addon);
   }
 
-  installButtonClicked(searchResult: AddonDescription) {
-    GameVersionStateMap.get(this.gameVersion)?.install(searchResult);
+  installButtonClicked(addon: AddonDescription) {
+    GameVersionStateMap.get(this.gameVersion)?.install(addon);
+  }
+
+  deleteButtonClicked(addon: AddonDescription) {
+    GameVersionStateMap.get(this.gameVersion)?.delete(addon);
   }
 }
 </script>

@@ -35,6 +35,11 @@ export default class GameVersion extends VuexModule {
   }
 
   @Mutation
+  removeInstalledAddon(addon: AddonDescription) {
+    Vue.delete(this.installedAddons, addon.slipstreamId);
+  }
+
+  @Mutation
   clear() {
     this.installedAddons = {};
     this.searchResults = [];
@@ -152,5 +157,23 @@ export default class GameVersion extends VuexModule {
     }
 
     this.install(latestVersion);
+  }
+
+  @Action
+  async delete(addon: AddonDescription) {
+    this.removeInstalledAddon(addon);
+    this.setAddonStatus({ addon, status: makeAddonStatus("NotInstalled") });
+
+    try {
+      await addonManager.delete(
+        addon,
+        ApplicationState.addonDirectoryForVersion(this.gameVersion)
+      );
+    } catch (error) {
+      // TODO: pop something up to warn that directories may not have been removed.
+      console.warn(
+        `Failed to remove directories for addon: ${addon.title} error: ${error}`
+      );
+    }
   }
 }
