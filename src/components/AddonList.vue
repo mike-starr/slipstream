@@ -43,7 +43,7 @@
                     statusMap[addon.slipstreamId].state === 'Installed' &&
                       updateAvailable(addon.slipstreamId)
                   "
-                  color="primary lighten-1"
+                  color="primary"
                   fab
                   outlined
                   small
@@ -53,7 +53,7 @@
                 </v-btn>
                 <v-btn
                   v-if="statusMap[addon.slipstreamId].state === 'NotInstalled'"
-                  color="primary lighten-1"
+                  color="primary"
                   fab
                   outlined
                   small
@@ -62,7 +62,7 @@
                 >
                 <v-progress-circular
                   v-if="statusMap[addon.slipstreamId].state === 'Installing'"
-                  color="primary lighten-1"
+                  color="primary"
                   height="36"
                   :indeterminate="
                     statusMap[addon.slipstreamId].progress.operation ===

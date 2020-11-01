@@ -14,6 +14,7 @@ export default class GameVersion extends VuexModule {
   gameVersion = "";
   updateCheckInProgress = false;
   updateAllInProgress = false;
+  outOfDateAddonCount = 0;
   installedAddons: AddonDescriptionMap = {};
   latestAddons: AddonDescriptionMap = {};
   searchResults: AddonDescription[] = [];
@@ -34,6 +35,11 @@ export default class GameVersion extends VuexModule {
   @Mutation
   setUpdateAllInProgress(value: boolean) {
     this.updateAllInProgress = value;
+  }
+
+  @Mutation
+  setOutOfDateAddonCount(value: number) {
+    this.outOfDateAddonCount = value;
   }
 
   @Mutation
@@ -97,6 +103,7 @@ export default class GameVersion extends VuexModule {
     }
 
     this.setUpdateCheckInProgress(false);
+    this.updateOutOfDateAddonCount();
   }
 
   @Action
@@ -169,6 +176,8 @@ export default class GameVersion extends VuexModule {
       });
       console.log(error);
     }
+
+    this.updateOutOfDateAddonCount();
   }
 
   @Action
@@ -218,5 +227,21 @@ export default class GameVersion extends VuexModule {
         `Failed to remove directories for addon: ${addon.title} error: ${error}`
       );
     }
+
+    this.updateOutOfDateAddonCount();
+  }
+
+  @Action
+  updateOutOfDateAddonCount() {
+    let count = 0;
+
+    for (const installedAddon of Object.values(this.installedAddons)) {
+      const latestVersion = this.latestAddons[installedAddon.slipstreamId];
+
+      if (latestVersion && latestVersion.fileDate !== installedAddon.fileDate) {
+        ++count;
+      }
+    }
+    this.setOutOfDateAddonCount(count);
   }
 }

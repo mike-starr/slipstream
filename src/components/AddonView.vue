@@ -1,7 +1,7 @@
 <template>
   <v-sheet height="100%" class="d-flex flex-column">
     <v-sheet>
-      <v-tabs v-model="tabs" color="primary lighten-1">
+      <v-tabs v-model="tabs" color="primary">
         <v-tab
           ><v-icon left>mdi-format-list-bulleted</v-icon>Installed Addons</v-tab
         >

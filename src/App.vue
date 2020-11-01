@@ -21,7 +21,7 @@
           <v-col>
             <div class="text-center">
               <v-btn
-                color="primary lighten-1"
+                color="primary"
                 fab
                 outlined
                 :disabled="updateCheckInProgress()"
@@ -37,15 +37,27 @@
         <v-row no-gutters align="start" justify="center">
           <v-col>
             <div class="text-center">
-              <v-btn
-                color="primary lighten-1"
-                fab
-                outlined
-                :disabled="updateAllInProgress()"
-                @click.stop="updateAllButtonClicked()"
-              >
-                <v-icon>mdi-download-multiple</v-icon>
-              </v-btn>
+              <v-badge
+                bordered
+                overlap
+                left
+                :offset-x="16"
+                :offset-y="16"
+                :content="outOfDateAddonCount()"
+                :value="outOfDateAddonCount() > 0"
+                color="error"
+                ><v-btn
+                  color="primary"
+                  fab
+                  outlined
+                  :disabled="
+                    updateAllInProgress() || outOfDateAddonCount() === 0
+                  "
+                  @click.stop="updateAllButtonClicked()"
+                >
+                  <v-icon>mdi-download-multiple</v-icon>
+                </v-btn>
+              </v-badge>
             </div>
           </v-col>
         </v-row>
@@ -60,6 +72,12 @@
     </v-main>
   </v-app>
 </template>
+
+<style scoped>
+.v-badge {
+  font-weight: 900;
+}
+</style>
 
 <script lang="ts">
 import { Component, Watch, Vue } from "vue-property-decorator";
@@ -92,6 +110,16 @@ export default class App extends Vue {
 
   get selectedVersion() {
     return ApplicationState.selectedVersion;
+  }
+
+  outOfDateAddonCount() {
+    let count = 0;
+
+    for (const addonState of GameVersionStateMap.values()) {
+      count += addonState.outOfDateAddonCount;
+    }
+
+    return count;
   }
 
   updateCheckInProgress() {

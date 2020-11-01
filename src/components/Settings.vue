@@ -10,13 +10,7 @@
         <v-row no-gutters align="start" justify="center">
           <v-col>
             <div class="text-center">
-              <v-btn
-                color="primary lighten-1"
-                fab
-                outlined
-                v-bind="attrs"
-                v-on="on"
-              >
+              <v-btn color="primary" fab outlined v-bind="attrs" v-on="on">
                 <v-icon>mdi-cog</v-icon>
               </v-btn>
             </div>
@@ -54,7 +48,7 @@
               :value="rootDirectory()"
             >
               <template v-slot:append>
-                <v-icon color="primary lighten-1" @click="browseButtonClicked()"
+                <v-icon color="primary" @click="browseButtonClicked()"
                   >mdi-folder-edit</v-icon
                 >
               </template>
