@@ -6,8 +6,8 @@
     transition="fade-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-container>
-        <v-row align="start" justify="center">
+      <v-container fluid>
+        <v-row no-gutters align="start" justify="center">
           <v-col>
             <div class="text-center">
               <v-btn

@@ -14,21 +14,43 @@
         </v-tab>
       </v-tabs>
 
-      <v-divider />
+      <v-divider class="mb-3" />
+
+      <v-container fluid>
+        <v-row no-gutters align="start" justify="center">
+          <v-col>
+            <div class="text-center">
+              <v-btn
+                color="primary lighten-1"
+                fab
+                outlined
+                :disabled="updateCheckInProgress()"
+                @click.stop="checkForUpdatesButtonClicked()"
+              >
+                <v-icon>mdi-refresh</v-icon>
+              </v-btn>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container fluid>
+        <v-row no-gutters align="start" justify="center">
+          <v-col>
+            <div class="text-center">
+              <v-btn
+                color="primary lighten-1"
+                fab
+                outlined
+                :disabled="updateAllInProgress()"
+                @click.stop="updateAllButtonClicked()"
+              >
+                <v-icon>mdi-download-multiple</v-icon>
+              </v-btn>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
       <Settings />
-
-      <!-- <v-container>
-        <v-row justify="center">
-          <v-card width="120" rounded="xl" color="transparent">
-            <v-row justify="center">
-              <v-card width="64" rounded="circle" color="white" flat>
-                <v-img contain :src="logo"></v-img></v-card
-            ></v-row>
-
-            <v-row justify="center"> Retail</v-row>
-          </v-card>
-        </v-row></v-container
-      > -->
     </v-navigation-drawer>
 
     <v-main>
@@ -46,7 +68,6 @@ import AddonSearch from "./components/AddonSearch.vue";
 import Settings from "./components/Settings.vue";
 
 import { GameVersionStateMap, ApplicationState } from "@/store/index";
-import logo from "@/assets/logo.png";
 
 const friendlyVersionNames: { [key: string]: string } = {
   _retail_: "Retail",
@@ -73,10 +94,26 @@ export default class App extends Vue {
     return ApplicationState.selectedVersion;
   }
 
-  // get real icons for game versions
-  get logo() {
-    return logo;
+  updateCheckInProgress() {
+    for (const addonState of GameVersionStateMap.values()) {
+      if (addonState.updateCheckInProgress) {
+        return true;
+      }
+    }
+
+    return false;
   }
+
+  updateAllInProgress() {
+    for (const addonState of GameVersionStateMap.values()) {
+      if (addonState.updateAllInProgress) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @Watch("versions")
   versionsChanged() {
     this.tab = null;
@@ -94,6 +131,18 @@ export default class App extends Vue {
 
   onListChange(value: number) {
     ApplicationState.selectVersion(this.versions[value]);
+  }
+
+  checkForUpdatesButtonClicked() {
+    for (const addonState of GameVersionStateMap.values()) {
+      addonState.checkForUpdates();
+    }
+  }
+
+  updateAllButtonClicked() {
+    for (const addonState of GameVersionStateMap.values()) {
+      addonState.updateAll();
+    }
   }
 
   created() {

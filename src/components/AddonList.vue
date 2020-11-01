@@ -32,7 +32,9 @@
                   </template>
                 </v-img>
               </v-avatar>
-              <span class="font-weight-medium">{{ addon.title }}</span>
+              <span class="grey--text text--lighten-4 font-weight-medium">{{
+                addon.title
+              }}</span>
             </v-col>
             <v-col cols="3"
               ><div class="text-center">

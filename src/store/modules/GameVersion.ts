@@ -12,6 +12,8 @@ type AddonDescriptionMap = {
 @Module
 export default class GameVersion extends VuexModule {
   gameVersion = "";
+  updateCheckInProgress = false;
+  updateAllInProgress = false;
   installedAddons: AddonDescriptionMap = {};
   latestAddons: AddonDescriptionMap = {};
   searchResults: AddonDescription[] = [];
@@ -22,6 +24,16 @@ export default class GameVersion extends VuexModule {
   @Mutation
   setVersion(version: string) {
     this.gameVersion = version;
+  }
+
+  @Mutation
+  setUpdateCheckInProgress(value: boolean) {
+    this.updateCheckInProgress = value;
+  }
+
+  @Mutation
+  setUpdateAllInProgress(value: boolean) {
+    this.updateAllInProgress = value;
   }
 
   @Mutation
@@ -74,6 +86,8 @@ export default class GameVersion extends VuexModule {
 
   @Action
   async checkForUpdates() {
+    this.setUpdateCheckInProgress(true);
+
     const latestAddons = await addonManager.latestVersionForAddons(
       Object.values(this.installedAddons)
     );
@@ -81,6 +95,8 @@ export default class GameVersion extends VuexModule {
     for (const latestAddon of latestAddons) {
       this.setLatestAddon(latestAddon);
     }
+
+    this.setUpdateCheckInProgress(false);
   }
 
   @Action
@@ -107,6 +123,16 @@ export default class GameVersion extends VuexModule {
 
   @Action
   async install(addon: AddonDescription) {
+    if (
+      this.addonStatus[addon.slipstreamId].state !== "Installed" &&
+      this.addonStatus[addon.slipstreamId].state !== "NotInstalled"
+    ) {
+      console.warn(
+        `Attempted to install an addon (${addon.title}) while another operation was in progress.`
+      );
+      return;
+    }
+
     try {
       this.setAddonStatus({
         addon,
@@ -157,6 +183,23 @@ export default class GameVersion extends VuexModule {
     }
 
     this.install(latestVersion);
+  }
+
+  @Action
+  updateAll() {
+    this.setUpdateAllInProgress(true);
+
+    const promises = [];
+
+    for (const installedAddon of Object.values(this.installedAddons)) {
+      const latestVersion = this.latestAddons[installedAddon.slipstreamId];
+
+      if (latestVersion && latestVersion.fileDate !== installedAddon.fileDate) {
+        promises.push(this.install(latestVersion));
+      }
+    }
+
+    Promise.allSettled(promises).then(() => this.setUpdateAllInProgress(false));
   }
 
   @Action
