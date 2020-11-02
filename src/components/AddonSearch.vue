@@ -1,12 +1,13 @@
 <template>
-  <v-container>
-    <v-row align="center">
+  <v-container fluid>
+    <v-row align="center" justify="start">
       <v-col cols="8">
         <v-text-field
           v-model="searchTerm"
           height="36px"
-          class="mx-4"
+          class="ml-2"
           label="Search"
+          :loading="searchInProgress"
           dense
         ></v-text-field>
       </v-col>
@@ -24,6 +25,10 @@ export default class AddonSearch extends Vue {
   searchTerm = "";
 
   @Prop({ type: String }) readonly gameVersion!: string;
+
+  get searchInProgress() {
+    return GameVersionStateMap.get(this.gameVersion)?.searchInProgress;
+  }
 
   @Watch("gameVersion")
   gameVersionChanged() {

@@ -214,7 +214,7 @@ export default class AddonList extends Vue {
   }
 
   get statusMap() {
-    return GameVersionStateMap.get(this.gameVersion)?.addonStatus;
+    return GameVersionStateMap.get(this.gameVersion)?.addonStatus || {};
   }
 
   updateAvailable(slipstreamId: string): boolean {

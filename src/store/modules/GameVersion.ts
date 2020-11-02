@@ -14,6 +14,8 @@ export default class GameVersion extends VuexModule {
   gameVersion = "";
   updateCheckInProgress = false;
   updateAllInProgress = false;
+  searchTerm = "";
+  searchInProgress = false;
   outOfDateAddonCount = 0;
   installedAddons: AddonDescriptionMap = {};
   latestAddons: AddonDescriptionMap = {};
@@ -35,6 +37,16 @@ export default class GameVersion extends VuexModule {
   @Mutation
   setUpdateAllInProgress(value: boolean) {
     this.updateAllInProgress = value;
+  }
+
+  @Mutation
+  setSearchTerm(value: string) {
+    this.searchTerm = value;
+  }
+
+  @Mutation
+  setSearchInProgress(value: boolean) {
+    this.searchInProgress = value;
   }
 
   @Mutation
@@ -108,6 +120,9 @@ export default class GameVersion extends VuexModule {
 
   @Action
   async search(searchTerm: string) {
+    this.setSearchTerm(searchTerm);
+    this.setSearchInProgress(true);
+
     const searchResults = await addonManager.search(
       searchTerm,
       this.gameVersion
@@ -125,7 +140,10 @@ export default class GameVersion extends VuexModule {
       this.setLatestAddon(result);
     }
 
-    this.setSearchResults(searchResults);
+    if (searchTerm === this.searchTerm) {
+      this.setSearchInProgress(false);
+      this.setSearchResults(searchResults);
+    }
   }
 
   @Action

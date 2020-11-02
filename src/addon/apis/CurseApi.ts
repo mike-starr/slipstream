@@ -26,7 +26,9 @@ export function search(
 }
 
 export function addonDescriptions(ids: number[]) {
-  return got.post(`${baseApiUrl}/addon`, {
-    json: ids
-  }).json();
+  return got
+    .post(`${baseApiUrl}/addon`, {
+      json: ids
+    })
+    .json();
 }
