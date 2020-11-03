@@ -66,8 +66,31 @@
     </v-navigation-drawer>
 
     <v-main>
-      <div style="height: 100%">
-        <AddonView :gameVersion="selectedVersion" />
+      <div style="height: 100%;">
+        <AddonView v-if="versions.length > 0" :gameVersion="selectedVersion" />
+        <v-container v-else fluid>
+          <v-row justify="center" align="center">
+            <v-col cols="10">
+              <v-card width="100%">
+                <v-card-title>
+                  Welcome
+                </v-card-title>
+                <v-card-subtitle
+                  >To get started, head over to settings to specify your World
+                  of Warcraft directory.</v-card-subtitle
+                >
+                <v-card-actions>
+                  <v-btn
+                    color="primary"
+                    text
+                    @click.stop="settingsButtonClicked()"
+                    >Settings
+                  </v-btn></v-card-actions
+                >
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
       </div>
     </v-main>
   </v-app>
@@ -171,6 +194,10 @@ export default class App extends Vue {
     for (const addonState of GameVersionStateMap.values()) {
       addonState.updateAll();
     }
+  }
+
+  settingsButtonClicked() {
+    this.$root.$emit("open-settings-dialog");
   }
 
   created() {

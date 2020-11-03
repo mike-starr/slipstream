@@ -86,6 +86,10 @@ export default class AddonSearch extends Vue {
     ipcRenderer.on(directorySelectReplyChannel, (event, directoryName) => {
       ApplicationState.updateRootGameDirectory(directoryName);
     });
+
+    this.$root.$on("open-settings-dialog", () => {
+      this.dialog = true;
+    });
   }
 }
 </script>

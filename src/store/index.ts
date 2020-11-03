@@ -19,11 +19,6 @@ export const ApplicationState = new Application({
   name: "Application"
 });
 
-/*export const GameState = new Game({
-  store,
-  name: "Game"
-});*/
-
 export const GameVersionStateMap = new Map<string, GameVersion>();
 
 export function updateAddonStates(versions: string[]) {
