@@ -5,12 +5,12 @@
         v-model="tab"
         @change="onListChange"
         vertical
-        color="white"
+        color="grey lighten-4"
         icons-and-text
       >
         <v-tab v-for="(version, i) in versions" :key="i">
           {{ friendlyNameForVersion(version) }}
-          <v-icon>mdi-sword-cross</v-icon>
+          <v-icon>{{ iconForVersion(version) }}</v-icon>
         </v-tab>
       </v-tabs>
 
@@ -117,6 +117,13 @@ const friendlyVersionNames: { [key: string]: string } = {
   _ptr_: "PTR"
 };
 
+const versionIcons: { [key: string]: string } = {
+  _retail_: "mdi-sword-cross",
+  _classic_: "mdi-candle",
+  _beta_: "mdi-hammer-wrench",
+  _ptr_: "mdi-flask-outline"
+};
+
 @Component({
   components: {
     AddonView,
@@ -178,6 +185,10 @@ export default class App extends Vue {
     return friendlyVersionNames[version]
       ? friendlyVersionNames[version]
       : version;
+  }
+
+  iconForVersion(version: string) {
+    return versionIcons[version] ? versionIcons[version] : "mdi-flask-outline";
   }
 
   onListChange(value: number) {
