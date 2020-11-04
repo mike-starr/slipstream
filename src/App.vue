@@ -145,7 +145,7 @@ export default class App extends Vue {
   outOfDateAddonCount() {
     let count = 0;
 
-    for (const addonState of GameVersionStateMap.values()) {
+    for (const addonState of Object.values(GameVersionStateMap)) {
       count += addonState.outOfDateAddonCount;
     }
 
@@ -153,7 +153,7 @@ export default class App extends Vue {
   }
 
   updateCheckInProgress() {
-    for (const addonState of GameVersionStateMap.values()) {
+    for (const addonState of Object.values(GameVersionStateMap)) {
       if (addonState.updateCheckInProgress) {
         return true;
       }
@@ -163,7 +163,7 @@ export default class App extends Vue {
   }
 
   updateAllInProgress() {
-    for (const addonState of GameVersionStateMap.values()) {
+    for (const addonState of Object.values(GameVersionStateMap)) {
       if (addonState.updateAllInProgress) {
         return true;
       }
@@ -176,7 +176,7 @@ export default class App extends Vue {
   versionsChanged() {
     this.tab = null;
 
-    for (const addonState of GameVersionStateMap.values()) {
+    for (const addonState of Object.values(GameVersionStateMap)) {
       addonState.refresh();
     }
   }
@@ -196,13 +196,13 @@ export default class App extends Vue {
   }
 
   checkForUpdatesButtonClicked() {
-    for (const addonState of GameVersionStateMap.values()) {
+    for (const addonState of Object.values(GameVersionStateMap)) {
       addonState.checkForUpdates();
     }
   }
 
   updateAllButtonClicked() {
-    for (const addonState of GameVersionStateMap.values()) {
+    for (const addonState of Object.values(GameVersionStateMap)) {
       addonState.updateAll();
     }
   }

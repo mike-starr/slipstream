@@ -27,7 +27,7 @@ export default class AddonSearch extends Vue {
   @Prop({ type: String }) readonly gameVersion!: string;
 
   get searchInProgress() {
-    return GameVersionStateMap.get(this.gameVersion)?.searchInProgress;
+    return GameVersionStateMap[this.gameVersion]?.searchInProgress;
   }
 
   @Watch("gameVersion")
@@ -39,7 +39,7 @@ export default class AddonSearch extends Vue {
   @Watch("searchTerm")
   searchTermChanged() {
     if (this.searchTerm.length > 1) {
-      GameVersionStateMap.get(this.gameVersion)?.search(this.searchTerm);
+      GameVersionStateMap[this.gameVersion]?.search(this.searchTerm);
     }
   }
 }

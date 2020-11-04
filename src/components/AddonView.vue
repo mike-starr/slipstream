@@ -40,12 +40,12 @@ export default class App extends Vue {
 
   get installedAddons() {
     return Object.values(
-      GameVersionStateMap.get(this.gameVersion)?.installedAddons || {}
+      GameVersionStateMap[this.gameVersion]?.installedAddons || {}
     );
   }
 
   get searchResults() {
-    return GameVersionStateMap.get(this.gameVersion)?.searchResults;
+    return GameVersionStateMap[this.gameVersion]?.searchResults;
   }
 }
 </script>

@@ -19,18 +19,20 @@ export const ApplicationState = new Application({
   name: "Application"
 });
 
-export const GameVersionStateMap = new Map<string, GameVersion>();
+export const GameVersionStateMap: { [key: string]: GameVersion } = {};
 
 export function updateAddonStates(versions: string[]) {
-  for (const version of versions) {
-    if (!GameVersionStateMap.has(version)) {
-      const addonState = new GameVersion({
-        store,
-        name: version
-      });
+  for (const key of Object.keys(GameVersionStateMap)) {
+    delete GameVersionStateMap[key];
+  }
 
-      addonState.setVersion(version);
-      GameVersionStateMap.set(version, addonState);
-    }
+  for (const version of versions) {
+    const addonState = new GameVersion({
+      store,
+      name: version
+    });
+
+    addonState.setVersion(version);
+    GameVersionStateMap[version] = addonState;
   }
 }

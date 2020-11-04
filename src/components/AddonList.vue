@@ -206,15 +206,15 @@ export default class AddonList extends Vue {
   @Prop({ type: Array }) readonly addons!: string;
 
   get latestAddonMap() {
-    return GameVersionStateMap.get(this.gameVersion)?.latestAddons || {};
+    return GameVersionStateMap[this.gameVersion]?.latestAddons || {};
   }
 
   get installedAddonMap() {
-    return GameVersionStateMap.get(this.gameVersion)?.installedAddons || {};
+    return GameVersionStateMap[this.gameVersion]?.installedAddons || {};
   }
 
   get statusMap() {
-    return GameVersionStateMap.get(this.gameVersion)?.addonStatus || {};
+    return GameVersionStateMap[this.gameVersion]?.addonStatus || {};
   }
 
   updateAvailable(slipstreamId: string): boolean {
@@ -232,15 +232,15 @@ export default class AddonList extends Vue {
   }
 
   updateButtonClicked(addon: AddonDescription) {
-    GameVersionStateMap.get(this.gameVersion)?.update(addon);
+    GameVersionStateMap[this.gameVersion]?.update(addon);
   }
 
   installButtonClicked(addon: AddonDescription) {
-    GameVersionStateMap.get(this.gameVersion)?.install(addon);
+    GameVersionStateMap[this.gameVersion]?.install(addon);
   }
 
   deleteButtonClicked(addon: AddonDescription) {
-    GameVersionStateMap.get(this.gameVersion)?.delete(addon);
+    GameVersionStateMap[this.gameVersion]?.delete(addon);
   }
 }
 </script>
