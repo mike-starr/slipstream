@@ -68,7 +68,7 @@
     <v-main>
       <div style="height: 100%;">
         <AddonView v-if="versions.length > 0" :gameVersion="selectedVersion" />
-        <v-container v-else fluid>
+        <v-container v-else-if="initialized" fluid>
           <v-row justify="center" align="center">
             <v-col cols="10">
               <v-card width="100%">
@@ -133,6 +133,7 @@ const versionIcons: { [key: string]: string } = {
 })
 export default class App extends Vue {
   tab = null;
+  initialized = false;
 
   get versions() {
     return ApplicationState.gameDirectories.versions;
@@ -212,7 +213,9 @@ export default class App extends Vue {
   }
 
   created() {
-    ApplicationState.initialize();
+    ApplicationState.initialize().then(() => {
+      this.initialized = true;
+    });
   }
 }
 </script>
