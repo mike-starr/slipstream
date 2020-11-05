@@ -36,30 +36,50 @@
                 addon.title
               }}</span>
             </v-col>
-            <v-col cols="3"
-              ><div class="text-center">
-                <v-btn
+            <v-col cols="3">
+              <div class="text-center">
+                <div
                   v-if="
                     statusMap[addon.slipstreamId].state === 'Installed' &&
                       updateAvailable(addon.slipstreamId)
                   "
-                  color="primary"
-                  fab
-                  outlined
-                  small
-                  @click.stop="updateButtonClicked(addon)"
                 >
-                  <v-icon>mdi-sync</v-icon>
-                </v-btn>
-                <v-btn
+                  <v-tooltip left transition="fade-transition">
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        fab
+                        outlined
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                        @click.stop="updateButtonClicked(addon)"
+                      >
+                        <v-icon>mdi-sync</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Update</span>
+                  </v-tooltip>
+                </div>
+                <div
                   v-if="statusMap[addon.slipstreamId].state === 'NotInstalled'"
-                  color="primary"
-                  fab
-                  outlined
-                  small
-                  @click.stop="installButtonClicked(addon)"
-                  ><v-icon>mdi-download</v-icon></v-btn
                 >
+                  <v-tooltip left transition="fade-transition">
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        fab
+                        outlined
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                        @click.stop="installButtonClicked(addon)"
+                        ><v-icon>mdi-download</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Install</span>
+                  </v-tooltip>
+                </div>
                 <v-progress-circular
                   v-if="statusMap[addon.slipstreamId].state === 'Installing'"
                   color="primary"
@@ -121,26 +141,33 @@
                     <v-list-item-content>
                       <v-list-item-title
                         >Installed Version
-                        <v-btn
-                          v-if="
-                            statusMap[addon.slipstreamId].state !==
-                              'NotInstalled'
-                          "
-                          :disabled="
-                            !(
-                              statusMap[addon.slipstreamId].state ===
-                              'Installed'
-                            )
-                          "
-                          class="pb-1"
-                          icon
-                          x-small
-                          color="error"
-                          @click.stop="deleteButtonClicked(addon)"
-                        >
-                          <v-icon>mdi-delete</v-icon>
-                        </v-btn></v-list-item-title
-                      >
+                        <v-tooltip right transition="fade-transition">
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              v-if="
+                                statusMap[addon.slipstreamId].state !==
+                                  'NotInstalled'
+                              "
+                              :disabled="
+                                !(
+                                  statusMap[addon.slipstreamId].state ===
+                                  'Installed'
+                                )
+                              "
+                              class="pb-1"
+                              icon
+                              x-small
+                              color="error"
+                              v-bind="attrs"
+                              v-on="on"
+                              @click.stop="deleteButtonClicked(addon)"
+                            >
+                              <v-icon>mdi-delete</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Uninstall</span>
+                        </v-tooltip>
+                      </v-list-item-title>
                       <v-list-item-subtitle>{{
                         installedAddonMap[addon.slipstreamId].displayVersion
                       }}</v-list-item-subtitle>

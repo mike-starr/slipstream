@@ -5,14 +5,25 @@
     hide-overlay
     transition="fade-transition"
   >
-    <template v-slot:activator="{ on, attrs }">
+    <template v-slot:activator="{ on: menu, attrs }">
       <v-container fluid>
         <v-row no-gutters align="start" justify="center">
           <v-col>
             <div class="text-center">
-              <v-btn color="primary" fab outlined v-bind="attrs" v-on="on">
-                <v-icon>mdi-cog</v-icon>
-              </v-btn>
+              <v-tooltip right transition="fade-transition">
+                <template v-slot:activator="{ on: tooltip }">
+                  <v-btn
+                    color="primary"
+                    fab
+                    outlined
+                    v-bind="attrs"
+                    v-on="{ ...tooltip, ...menu }"
+                  >
+                    <v-icon>mdi-cog</v-icon>
+                  </v-btn>
+                </template>
+                <span>Settings</span>
+              </v-tooltip>
             </div>
           </v-col>
         </v-row>

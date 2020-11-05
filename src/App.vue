@@ -20,15 +20,22 @@
         <v-row no-gutters align="start" justify="center">
           <v-col>
             <div class="text-center">
-              <v-btn
-                color="primary"
-                fab
-                outlined
-                :disabled="updateCheckInProgress()"
-                @click.stop="checkForUpdatesButtonClicked()"
-              >
-                <v-icon>mdi-refresh</v-icon>
-              </v-btn>
+              <v-tooltip right transition="fade-transition">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="primary"
+                    fab
+                    outlined
+                    v-bind="attrs"
+                    v-on="on"
+                    :disabled="updateCheckInProgress()"
+                    @click.stop="checkForUpdatesButtonClicked()"
+                  >
+                    <v-icon>mdi-refresh</v-icon>
+                  </v-btn>
+                </template>
+                <span>Check for Updates</span>
+              </v-tooltip>
             </div>
           </v-col>
         </v-row>
@@ -46,17 +53,25 @@
                 :content="outOfDateAddonCount()"
                 :value="outOfDateAddonCount() > 0"
                 color="error"
-                ><v-btn
-                  color="primary"
-                  fab
-                  outlined
-                  :disabled="
-                    updateAllInProgress() || outOfDateAddonCount() === 0
-                  "
-                  @click.stop="updateAllButtonClicked()"
-                >
-                  <v-icon>mdi-download-multiple</v-icon>
-                </v-btn>
+              >
+                <v-tooltip right transition="fade-transition">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      fab
+                      outlined
+                      v-bind="attrs"
+                      v-on="on"
+                      :disabled="
+                        updateAllInProgress() || outOfDateAddonCount() === 0
+                      "
+                      @click.stop="updateAllButtonClicked()"
+                    >
+                      <v-icon>mdi-download-multiple</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Update All</span>
+                </v-tooltip>
               </v-badge>
             </div>
           </v-col>
