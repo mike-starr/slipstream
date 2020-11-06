@@ -2,30 +2,21 @@
 
 An addon manger for World of Warcraft
 
-## Project setup
-```
-npm install
-```
+![](screenshot.png)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+slipstream is an alternative to the official Curse addon client in early development. It was created primarily for my own use and as a means to learn the underlying frameworks.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Things that work
+- Search, install, and update from CurseForge.
+- Bulk update.
+- Deletion.
+- Retail and Classic.
+- Windows and OSX.
 
-### Run your unit tests
-```
-npm run test:unit
-```
+## Things that don't work (but may soon)
+- Addon detection: slipstream can only see the addons it has installed.
+- Integration with other addon repositories: TukUI, WowInterface, etc.
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Things that don't work (and probably never will)
+- Detection of modified addons.
+- Alternate (alpha/beta) CurseForge release channels.
