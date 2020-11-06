@@ -2,7 +2,7 @@
 
 An addon manger for World of Warcraft
 
-![](screenshot.png)
+![](https://github.com/varexi/slipstream/raw/master/docs/images/screenshot.png)
 
 slipstream is an alternative to the official Curse addon client in early development. It was created primarily for my own use and as a means to learn the underlying frameworks.
 
