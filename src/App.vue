@@ -117,6 +117,12 @@
 }
 </style>
 
+<style>
+html {
+  overflow-y: auto;
+}
+</style>
+
 <script lang="ts">
 import { Component, Watch, Vue } from "vue-property-decorator";
 import AddonView from "./components/AddonView.vue";
