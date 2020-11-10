@@ -9,8 +9,9 @@ slipstream is an alternative to the official Curse addon client in early develop
 Apparently the company that acquired CurseForge is, at some point in the future, planning to remove the APIs on which third-party addon managers depend, so this app may have a short lifespan.
 
 ## Installing
-Working on creating installers. To build/run from source:
+Installers are available in [Releases](https://github.com/varexi/slipstream/releases).
 
+## Building from Source
 ```npm install```
 
 ```npm run electron:build```
