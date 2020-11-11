@@ -245,12 +245,9 @@ export default class AddonList extends Vue {
   }
 
   updateAvailable(slipstreamId: string): boolean {
-    const latestAddon = this.latestAddonMap[slipstreamId];
-    const installedAddon = this.installedAddonMap[slipstreamId];
-
-    return latestAddon && installedAddon
-      ? latestAddon.fileDate !== installedAddon.fileDate
-      : false;
+    return GameVersionStateMap[this.gameVersion]?.updateAvailableForAddon(
+      slipstreamId
+    );
   }
 
   @Watch("gameVersion")

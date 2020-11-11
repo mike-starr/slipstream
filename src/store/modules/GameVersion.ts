@@ -24,6 +24,15 @@ export default class GameVersion extends VuexModule {
     [key: string]: AddonStatus;
   } = {};
 
+  updateAvailableForAddon(slipstreamId: string) {
+    const latestAddon = this.latestAddons[slipstreamId];
+    const installedAddon = this.installedAddons[slipstreamId];
+
+    return latestAddon && installedAddon
+      ? latestAddon.fileDate !== installedAddon.fileDate
+      : false;
+  }
+
   @Mutation
   setVersion(version: string) {
     this.gameVersion = version;

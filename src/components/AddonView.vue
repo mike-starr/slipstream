@@ -41,7 +41,23 @@ export default class App extends Vue {
   get installedAddons() {
     return Object.values(
       GameVersionStateMap[this.gameVersion]?.installedAddons || {}
-    );
+    ).sort((addon1, addon2) => {
+      const updateAvailableForAddon1 = GameVersionStateMap[
+        this.gameVersion
+      ]?.updateAvailableForAddon(addon1.slipstreamId);
+
+      const updateAvailableForAddon2 = GameVersionStateMap[
+        this.gameVersion
+      ]?.updateAvailableForAddon(addon2.slipstreamId);
+
+      if (updateAvailableForAddon1 && !updateAvailableForAddon2) {
+        return -1;
+      } else if (!updateAvailableForAddon1 && updateAvailableForAddon2) {
+        return 1;
+      } else {
+        return addon1.title.localeCompare(addon2.title);
+      }
+    });
   }
 
   get searchResults() {
