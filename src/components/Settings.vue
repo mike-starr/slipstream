@@ -41,11 +41,11 @@
       </v-toolbar>
       <v-container fluid>
         <v-row no-gutters justify="start">
-          <v-col cols="11"
-            ><div class="text-subtitle-1 ml-1">
+          <v-col cols="11">
+            <div class="text-subtitle-1 ml-1">
               World of Warcraft Directory
-            </div></v-col
-          >
+            </div>
+          </v-col>
         </v-row>
         <v-row no-gutters justify="start">
           <v-col cols="11">
@@ -53,14 +53,30 @@
               readonly
               solo
               background-color="secondary darken-1"
-              label="World of Warcraft Directory"
-              type="text"
-              color="white"
-              :value="rootDirectory()"
+              persistent-hint
+              :hint="
+                `The base directory of your World of Warcraft installation. Often, this is ${wowDirectorySuggestion}`
+              "
+              :error-messages="
+                !rootDirectoryValid && rootDirectory.length > 0
+                  ? `The specified directory does not appear to contain a World of Warcraft installation. Please ensure you've selected the base directory of your World of Warcraft installation (i.e. ${wowDirectorySuggestion}).`
+                  : null
+              "
+              :value="rootDirectory"
             >
               <template v-slot:append>
                 <v-icon color="primary" @click="browseButtonClicked()"
                   >mdi-folder-edit</v-icon
+                >
+              </template>
+              <template v-slot:append-outer>
+                <v-icon v-if="rootDirectoryValid" color="green darken-1"
+                  >mdi-check-bold</v-icon
+                >
+                <v-icon
+                  v-else-if="rootDirectory.length > 0"
+                  color="red darken-1"
+                  >mdi-close-thick</v-icon
                 >
               </template>
             </v-text-field>
@@ -75,6 +91,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import { ipcRenderer } from "electron";
 import { ApplicationState } from "@/store/index";
+import os from "os";
 
 const directorySelectReplyChannel = "wow-root-directory";
 
@@ -82,8 +99,18 @@ const directorySelectReplyChannel = "wow-root-directory";
 export default class AddonSearch extends Vue {
   dialog = false;
 
-  rootDirectory() {
+  get rootDirectory() {
     return ApplicationState.gameDirectories.rootDirectory;
+  }
+
+  get rootDirectoryValid() {
+    return ApplicationState.gameDirectories.versions.length > 0;
+  }
+
+  get wowDirectorySuggestion() {
+    return os.platform() === "darwin"
+      ? "/Applications/World of Warcraft"
+      : "C:\\Program Files (x86)\\World of Warcraft";
   }
 
   browseButtonClicked() {
