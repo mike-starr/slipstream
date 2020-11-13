@@ -23,6 +23,7 @@ export const GameVersionStateMap: { [key: string]: GameVersion } = {};
 
 export function updateAddonStates(versions: string[]) {
   for (const key of Object.keys(GameVersionStateMap)) {
+    store.unregisterModule(key);
     delete GameVersionStateMap[key];
   }
 
