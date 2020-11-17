@@ -167,6 +167,8 @@ export default class GameVersion extends VuexModule {
       return;
     }
 
+    const originalStatus = this.addonStatus[addon.slipstreamId];
+
     try {
       this.setAddonStatus({
         addon,
@@ -199,7 +201,7 @@ export default class GameVersion extends VuexModule {
     } catch (error) {
       this.setAddonStatus({
         addon,
-        status: makeAddonStatus("Error")
+        status: originalStatus
       });
       console.log(error);
     }

@@ -1,8 +1,7 @@
 export type AddonInstallState =
   | "Installed"
   | "NotInstalled"
-  | "Installing"
-  | "Error";
+  | "Installing";
 
 export type AddonInstallOperation =
   | "Initializing"
